@@ -60,8 +60,8 @@ If a check fails:
 - Do not add to cart.
 - Do not submit forms.
 - Do not solve captcha or bypass anti-bot states.
-- Pause at least 3 seconds between all visible browser actions.
-- Increase pause to 5-10 seconds for slow loading, errors, or site limits.
+- Use adaptive pauses: at least 1 second between routine visible actions when the page is stable; at least 3 seconds after navigation, page reloads, opening or closing modals, clicks that trigger loading, retries, or uncertain page state.
+- Increase pause to 5-10 seconds for slow loading, errors, anti-bot/captcha states, automatic retries, or site limits.
 
 ## Data To Collect
 
@@ -113,7 +113,7 @@ Never mix extension overlay metrics with official WB card fields.
 
 1. Create output and diagnostics folders.
 2. Open the card URL in Google Chrome.
-3. Wait at least 3 seconds.
+3. Wait at least 3 seconds after opening the URL. If the tab was already fully loaded and no navigation occurred, wait at least 1 second.
 4. Capture `screenshots/initial_page.png`.
 5. Record:
    - timestamp
@@ -124,7 +124,7 @@ Never mix extension overlay metrics with official WB card fields.
 6. If cookie banner is visible:
    - screenshot before click
    - click visible accept button
-   - wait 3 seconds
+   - wait at least 1 second, or 3 seconds if the banner triggers reload/layout changes
    - verify it disappeared
    - screenshot after click
 7. Collect first-screen visible official WB data.
@@ -137,17 +137,17 @@ Never mix extension overlay metrics with official WB card fields.
     - reviews/questions
     - visible tooltips/modals
 11. After each action:
-    - wait at least 3 seconds
+    - wait at least 1 second for routine scrolls and screenshots; use at least 3 seconds when the action triggers loading, modal state changes, or page state is uncertain
     - screenshot current state
     - record visible text
     - add action to log
 12. For modals:
     - open only through native visible UI
-    - wait 3 seconds
+    - wait at least 3 seconds after opening a modal that loads content; for already-rendered modal scrolls, wait at least 1 second
     - screenshot
     - record visible text
     - close
-    - wait 3 seconds
+    - wait at least 1 second, or 3 seconds if the page relayouts/reloads
 13. If a site restriction appears:
     - screenshot
     - record exact text

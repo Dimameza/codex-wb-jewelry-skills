@@ -1,4 +1,4 @@
 interface:
   display_name: "WB Card Chrome Audit"
   short_description: "Manual Chrome audit workflow for Wildberries product cards."
-  default_prompt: "Use this skill to collect visible text data from one Wildberries product card through installed Google Chrome, with screenshots and no media downloads."
+  default_prompt: "Use $wb-card-chrome-audit to collect visible text data from one Wildberries product card through installed Google Chrome, with screenshots and no media downloads."

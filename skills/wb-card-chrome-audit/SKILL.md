@@ -30,8 +30,8 @@ If a permission fails, stop and tell the user exactly which macOS settings pane 
 
 - Work with exactly one requested card URL.
 - Use visible installed Google Chrome, not headless browser.
-- Use sequential actions with at least 3 seconds between navigation, clicks, scrolls, section opens, modal closes, and retries.
-- Increase to 5-10 seconds on slow loading, error states, or site limits.
+- Use sequential actions with adaptive pauses: at least 1 second between routine scrolls, screenshots, and reads of already-rendered UI; use at least 3 seconds after navigation, page reloads, opening or closing modals, clicks that trigger loading, retries, or uncertain page state.
+- Increase to 5-10 seconds on slow loading, error states, anti-bot/captcha states, automatic retries, or site limits.
 - Do not solve or bypass captcha, anti-bot, login, suspicious activity, or technical restrictions.
 - Do not download product photos, videos, thumbnails, or media files.
 - Screenshots are allowed only as visible-state evidence and OCR source.
@@ -44,12 +44,12 @@ If a permission fails, stop and tell the user exactly which macOS settings pane 
    - `screenshots/`
    - `/private/tmp/wb_card_<nm_id>/diagnostics/`
 2. Open the card URL in installed Google Chrome.
-3. Wait at least 3 seconds.
+3. Wait at least 3 seconds after opening the URL; if the tab was already fully loaded and only focus was restored, wait at least 1 second.
 4. Capture `screenshots/initial_page.png`.
 5. Record collection time, final URL, Chrome title, and page status.
-6. Close cookie banner only by clicking a visible accept button; wait 3 seconds and screenshot.
+6. Close cookie banner only by clicking a visible accept button; wait at least 1 second, or 3 seconds if the banner triggers reload/layout changes, and screenshot.
 7. Collect visible first-screen text: title, brand, price, old price, rating, questions/reviews, selected color/size, stock, delivery, badges.
-8. Scroll sequentially with `PageDown` or visible mouse/trackpad events; wait 3 seconds after each scroll.
+8. Scroll sequentially with `PageDown` or visible mouse/trackpad events; wait at least 1 second after routine scrolls, or 3 seconds when new content is loading or state is uncertain.
 9. Open native visible sections only: characteristics, description, seller, delivery, returns, reviews/questions, modals/tooltips.
 10. Screenshot every important state and record the source of every value.
 11. Store unknown fields as `null`, never guesses.

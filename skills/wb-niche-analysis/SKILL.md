@@ -7,7 +7,7 @@ description: Use when measuring a Wildberries niche — total monthly volume in 
 
 ## Overview
 
-Measure a WB niche end to end: how much money is in it, who takes it, who is growing, and where our purchase price fits. Built and validated on the Russian jewelry (bijouterie) niche on 2026-10-04.
+Measure a WB niche end to end: how much money is in it, who takes it, who is growing, and where our purchase price fits. Built and validated on the Russian jewelry (bijouterie) niche on 2026-10-04, hardened over three verification passes.
 
 Read `references/wb-niche-analysis-tz.md` before running. It carries the full spec, the traps, and the control figures from the validated run.
 
@@ -24,7 +24,10 @@ Read `references/wb-niche-analysis-tz.md` before running. It carries the full sp
 - Never use the MPSTATS "order dynamics %" field. Validated against our own sales: mean error 187 percentage points, sign correct 6 times out of 16.
 - Always calibrate the method against our own seller account before publishing any figure.
 - Always produce two independent estimates of the niche volume. A gap above 5 percent means the method is wrong.
-- Catalog collection needs real scroll events. JavaScript scrollTo renders the panel but does not load the next batch.
+- Seller catalogs paginate: /seller/ID?sort=popular&page=N. Without the page parameter you only ever get the first batch — 40 to 90 cards no matter how large the catalog is. Walk pages until one reports no products; a large seller runs past 400 cards.
+- Catalog collection needs real scroll events on each page. JavaScript scrollTo renders the panel but does not load the next batch.
+- The panel's "orders in RUB" is order volume at pre-loyalty-discount prices, not revenue. Validated against our own account: 69 percent above what buyers actually pay. Unit counts are accurate. Divide by roughly 1.7 for buyer money.
+- Two errors can cancel out. Under-collected catalogs (-46%) and inflated prices (+69%) once matched our own total to within 6 percent and looked like proof the method was sound. Reconcile card count and revenue as separate axes.
 
 ## Output
 

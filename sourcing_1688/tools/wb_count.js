@@ -1,0 +1,1 @@
+(function(){var c=document.querySelectorAll('article, [class*="product-card"]');var mp=0,ex="";c.forEach(function(x){var t=x.innerText||"";if(/Заказ/.test(t)&&/₽/.test(t)){mp++;if(!ex)ex=t.slice(0,400);}});return JSON.stringify({cards:c.length,with_mp:mp,y:window.scrollY,h:document.body.scrollHeight,vis:document.visibilityState,ex:ex});})()

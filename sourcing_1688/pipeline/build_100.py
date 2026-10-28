@@ -9,7 +9,7 @@ from PIL import Image
 
 W = os.path.dirname(os.path.abspath(__file__))
 N = int(sys.argv[1]); OUT = sys.argv[2]; MAX_SHOP = 10**9; QTY = int(os.environ.get("QTY", "50"))   # штук на позицию (заказ 1000 — 100 шт)   # без ограничения по фабрике (решение владельца 23.10)
-DRAFT = "/Volumes/ADATA SD810/WB/Подбор/Черновик_заказа_бижутерия_2026-10-22.xlsx"
+DRAFT = os.environ.get("DRAFT", "/Volumes/ADATA SD810/WB/Подбор/Черновик_заказа_бижутерия_2026-10-22.xlsx")   # 27.10: env DRAFT — черновик добора
 NV = "/Volumes/ADATA SD810/WB/Подбор/1688_данные/novinki55_2026-10-21"
 pr = json.load(open(f"{W}/photo_review.json"))
 EX = json.load(open(f"{W}/exclude_100.json")) if os.path.exists(f"{W}/exclude_100.json") else {"offers": {}, "novinki": {}, "notes": {}}

@@ -11,6 +11,17 @@ STYLES = ["珍珠", "锆石", "水钻", "复古", "法式", "轻奢", "欧美", 
 KW = [f"{s} {i}" for s in STYLES for i in SET_ITEMS]
 MAIN_KW = set(KW)
 tid = None; blocked_row = 0
+# 27.10 ускорение: не листать запрос дальше, если страница почти не даёт новых наборов (уже виденные офферы — из всех выдач и пула)
+import glob as _g
+SEEN = set()
+for _f in _g.glob("/Volumes/ADATA SD810/WB/Подбор/1688_данные/*/kq/*.json"):
+    if "/._" in _f:
+        continue
+    try:
+        SEEN |= {r.get("offerId") for r in json.load(open(_f)).get("rows", [])}
+    except Exception:
+        pass
+SETW = ("套装", "两件套", "三件套", "四件套", "一套")
 for i, kw in enumerate(KW):
     for pg in ((1, 2, 3, 4, 5) if kw in MAIN_KW else (1, 2, 3)):   # волна 3 (26.10): колье и комплекты — до 5-й страницы
         fn = f"{D}/kq/{kw.encode('gb18030').hex()}_{pg}.json"
@@ -42,5 +53,10 @@ for i, kw in enumerate(KW):
         time.sleep(9 + random.random() * 4)
         if not d.get("n"):
             break   # пустая страница — дальше по этому запросу не листаем
+        fresh = [r for r in d.get("rows", []) if r.get("offerId") not in SEEN and any(w in (r.get("title") or "") for w in SETW)]
+        SEEN |= {r.get("offerId") for r in d.get("rows", [])}
+        if pg >= 2 and len(fresh) < 3:
+            print(time.strftime("%H:%M"), "  мало новых наборов на странице", pg, "— дальше не листаем", flush=True)
+            break
 if tid: cb("close", tid)
 print("kq_sets3 готово", len(KW), "запросов", flush=True)

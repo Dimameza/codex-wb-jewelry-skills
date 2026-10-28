@@ -6,6 +6,15 @@ Q = {}
 for f in sorted(glob.glob("raw/q*.json")):
     if os.path.basename(f).startswith("._"): continue
     d = json.load(open(f)); Q[d["query"]] = [r for r in d["rows"] if r.get("orders30") is not None and r.get("price")]
+def pool(qs):
+    """Все карточки запросов группы с заказами за 30 дней (без ювелирки 925/585), цена — витринная, уже с СПП."""
+    seen, rows = set(), []
+    for q in qs:
+        for r in Q.get(q, []):
+            n = (r.get("name") or "").lower()
+            if r["nm"] in seen or "925" in n or "585" in n or "серебр" in n and "под серебро" not in n: continue
+            seen.add(r["nm"]); rows.append(r)
+    return rows
 def stats(qs):
     seen, rows = set(), []
     for q in qs:

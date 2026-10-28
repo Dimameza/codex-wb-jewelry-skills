@@ -9,11 +9,19 @@ from analyze import pool
 os.chdir("../оценка_2026-10-28")
 from price_check import group   # группы запросов те же
 SPP = float(os.environ.get("SPP", "0.35"))
+# Скульптурное золото: аналоги, отобранные глазами из выдачи по 16 скульптурным запросам (общие запросы его не находили)
+SCP = json.load(open("../wb_price_check_2026-10-28/sculpt/sculpt_pool.json"))["pool"]
+SETS = {"А2/Б колье|подвеска+серьги", "А3 набор 3", "А4 набор 4+", "набор прочий", "кольца набор"}
+def sculpt_kind(seg):
+    return "набор" if seg in SETS else "колье" if seg in ("колье", "чокер", "подвеска") else "серьги" if seg == "серьги" else None
 s = json.load(open("scored.json")); con = json.load(open("стили/consensus.json"))
 out = Counter()
 for i, r in enumerate(s):
-    qs, _ = group(r["seg"], con[str(i + 1)]["основной"])
-    rows = pool(qs); thr = r["need_P"] * (1 - SPP)
+    style = con[str(i + 1)]["основной"]; qs, _ = group(r["seg"], style)
+    rows = pool(qs)
+    if style == "SCULPT" and sculpt_kind(r["seg"]):
+        k = sculpt_kind(r["seg"]); rows = SCP[k]; qs = [f"скульптурное золото — {k} (аналоги глазами)"]
+    thr = r["need_P"] * (1 - SPP)
     ok_rows = [x for x in rows if x["orders30"] >= 30 and x["price"] >= thr]
     fresh = [x for x in ok_rows if (x.get("rating_cnt") or 0) < 100]
     ok = len(ok_rows) >= 5 and len(fresh) >= 1

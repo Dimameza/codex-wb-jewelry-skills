@@ -112,6 +112,8 @@ def score(it):
     restored = bool(d.get("restored"))
     q = []
     sz = "尺寸" in col or bool(re.search(r"长\(cm\)\t宽\(cm\)[^\n]*\n[^\n]*\t\d", d.get("weights") or ""))
+    # 29.10: размер/длина цепи часто указаны в параметрах или названии, а не в таблице 长×宽 (в т. ч. диапазон длины колье «周长 41–50 см»; значение обязательно с цифрой)
+    sz = sz or bool(re.search(r"\d+\s*(cm|CM|厘米|mm)|(链长|长度|周长|直径)\t?\n?[^\n\d]{0,6}\d", col + t + (d.get("weights") or "").split("商品详情")[0]))
     wk = it.get("wsrc") == "карточка"
     q.append((5, "вес и размеры есть в карточке 1688") if (wk and sz) else (0, "ожидает проверки: карточка восстановлена из черновика, размеры не сохранились" if restored else ("ожидает проверки: " + ("размеров нет в карточке" if wk else "вес — допущение, не из карточки"))))
     w = it["w"] if isinstance(it["w"], (int, float)) else None
@@ -126,7 +128,9 @@ def score(it):
     q.append((5, f"фото проверено ({pv}), сплав указан в карточке") if (pv.startswith("ок") and pv != "ок, условно" and mat) else (0, ("фото на грани (ок, условно)" if pv == "ок, условно" else "фото проверено") + ("" if mat else "; сплав / покрытие не указаны")))
     R["качество"] = (sum(x for x, _ in q), "; ".join(f"{y} ({x})" for x, y in q))
     # 6. комплектность и подарочность (10)
-    nvar = len([l for l in (d.get("weights") or "").split("\n")[2:] if "\t" in l and not l.startswith("商品")]) if d.get("weights") else 0
+    # 29.10: варианты — по списку «颜色» в параметрах; таблица весов захватывала хвост страницы и завышала число вариантов
+    mc = re.search(r"颜色\t?\n([^\n]+)", col)
+    nvar = len([v for v in re.split(r"[、,，]", mc.group(1)) if v.strip()]) if mc else len([l for l in (d.get("weights") or "").split("商品详情")[0].split("\n")[2:] if "\t" in l and l.strip()])
     if it["order"] == "1000-ч2" and it["src"] == "сборный":
         k1 = (5, f"сборная пара проверена по фото ({it.get('pv')}), один металл и мотив") if str(it.get("pv", "")).startswith("ок") else (0, "пара не проверена")
     elif nvar <= 1:

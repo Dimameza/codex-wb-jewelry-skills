@@ -108,19 +108,30 @@ def score(it):
         if occ: R["повод"] = (15, "; ".join(f"{a} — {b}" for a, b in occ))
         else: R["повод"] = (9, "круглогодичный повод (офис, ужин, повседневный образ) — без привязки к празднику")
     # 5. посадка и качество (15)
-    d = it.get("det") or {}; col = d.get("colors") or ""
+    d = it.get("det") or {}
+    # 29.10 (ревью Codex): отзывы покупателей вырезаются — «尺寸也正好» («размер подошёл») не размер изделия
+    col = re.sub(r"商品评价\n[\d.]+.*?查看全部评价", "", d.get("colors") or "", flags=re.S)
     restored = bool(d.get("restored"))
     q = []
-    sz = "尺寸" in col or bool(re.search(r"长\(cm\)\t宽\(cm\)[^\n]*\n[^\n]*\t\d", d.get("weights") or ""))
-    # 29.10: размер/длина цепи часто указаны в параметрах или названии, а не в таблице 长×宽 (в т. ч. диапазон длины колье «周长 41–50 см»; значение обязательно с цифрой)
-    sz = sz or bool(re.search(r"\d+\s*(cm|CM|厘米|mm)|(链长|长度|周长|直径)\t?\n?[^\n\d]{0,6}\d", col + t + (d.get("weights") or "").split("商品详情")[0]))
+    wt = (d.get("weights") or "").split("商品详情")[0]
+    sz = bool(re.search(r"长\(cm\)\t宽\(cm\)[^\n]*\n[^\n]*\t\d", wt)) or bool(re.search(r"尺寸\t?\n[^\n]*\d", col))
+    # 29.10: размер часто в параметрах или названии, а не в таблице 长×宽; значение обязательно с цифрой.
+    # Колье и наборы — только длина цепи (周长 41–50 см, 链长, ≥30 см): диаметр бусины «2mm珍珠» не размер изделия.
+    # Остальные — без 周长/链长: длина цепочки из соседнего варианта карточки не размер броши.
+    if it["seg"] in NECKSEG:
+        sz = sz or bool(re.search(r"(链长|长度|周长)\t?\n?[^\n\d]{0,6}\d", col + t)) or any(int(v) >= 30 for v in re.findall(r"(\d+)\s*(?:cm|CM|厘米)", col + t))
+    else:
+        sz = sz or bool(re.search(r"\d+\s*(cm|CM|厘米|mm)|(长度|直径)\t?\n?[^\n\d]{0,6}\d", re.sub(r"(周长|链长)\t?\n[^\n]*", "", col) + t + wt))
     wk = it.get("wsrc") == "карточка"
     q.append((5, "вес и размеры есть в карточке 1688") if (wk and sz) else (0, "ожидает проверки: карточка восстановлена из черновика, размеры не сохранились" if restored else ("ожидает проверки: " + ("размеров нет в карточке" if wk else "вес — допущение, не из карточки"))))
     w = it["w"] if isinstance(it["w"], (int, float)) else None
     if it["seg"] == "серьги":
         q.append((5, f"вес пары {w} г ≤ 20 (одна ≤ 10 г)") if (wk and w and w <= 20) else (0, f"вес серёг {w} г — тяжелее нормы или не подтверждён"))
     elif it["seg"] in NECKSEG:
-        q.append((5, "указан удлинитель цепи (регулировка)") if has(r"延长", col + t) else (0, "регулировка длины не указана — уточнить у продавца"))
+        # 29.10 (ревью Codex): «延长链: 无» — удлинителя НЕТ; хвостовая цепочка 尾链 — регулировка есть
+        ex = re.search(r"延长链?\t?\n?([^\n]*)", col + "\n" + t)
+        ext = bool(ex and not re.match(r"\s*(无|没有|否|0\b)", ex.group(1))) or has(r"尾链", col + t)
+        q.append((5, "указан удлинитель цепи (регулировка)") if ext else (0, "удлинителя нет (延长链: 无) — длина фиксированная" if ex else "регулировка длины не указана — уточнить у продавца"))
     else:
         q.append((0, "норматив посадки для сегмента не задан"))
     pv = it.get("pv") or ""
@@ -130,9 +141,13 @@ def score(it):
     # 6. комплектность и подарочность (10)
     # 29.10: варианты — по списку «颜色» в параметрах; таблица весов захватывала хвост страницы и завышала число вариантов
     mc = re.search(r"颜色\t?\n([^\n]+)", col)
-    nvar = len([v for v in re.split(r"[、,，]", mc.group(1)) if v.strip()]) if mc else len([l for l in (d.get("weights") or "").split("商品详情")[0].split("\n")[2:] if "\t" in l and l.strip()])
+    rows = [l for l in (d.get("weights") or "").split("商品详情")[0].split("\n")[2:] if "\t" in l and l.strip()]
+    # 29.10 (ревью Codex): нет ни списка цветов, ни строк таблицы — варианты неизвестны, а не «один вариант»
+    nvar = len([v for v in re.split(r"[、,，]", mc.group(1)) if v.strip()]) if mc else (len(rows) if rows else None)
     if it["order"] == "1000-ч2" and it["src"] == "сборный":
         k1 = (5, f"сборная пара проверена по фото ({it.get('pv')}), один металл и мотив") if str(it.get("pv", "")).startswith("ок") else (0, "пара не проверена")
+    elif nvar is None:
+        k1 = (0, "варианты в карточке не распознаны — уточнить у продавца")
     elif nvar <= 1:
         k1 = (5, "один вариант — состав и цвет однозначны")
     else:

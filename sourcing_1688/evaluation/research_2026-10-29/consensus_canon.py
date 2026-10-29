@@ -6,7 +6,7 @@
 - запас <1,0 → отложить до данных продаж; наборы — 15 самых дешёвых × 10."""
 import json, os
 from collections import Counter, defaultdict
-s = json.load(open("scored.json")); con = json.load(open("стили/consensus.json")); F = json.load(open("наборы_серьги/final_sets.json"))
+s = json.load(open("scored.json")); con = json.load(open("стили/consensus.json")); F = json.load(open("наборы_серьги/final_sets_canon.json"))   # 29.10: наборы по канону (sets_canon.py)
 CAP = int(os.environ.get("CAP", "0")); HALF70 = os.environ.get("HALF70") == "1"; HIT = {108, 111, 114, 199}
 out, y, T, plan = Counter(), Counter(), defaultdict(list), {}
 for i, r in enumerate(s):
@@ -24,9 +24,13 @@ for v in T.values():
     for j, (hr, n) in enumerate(v):
         r = s[n - 1]; a, q = ("тест 10", min(10, r["qty"])) if not CAP or j < CAP else ("тест следующей очередью", 0)
         out[a] += 1; y[a] += r["cny"] * q; plan[n] = (a, q)
-sets = sorted(F, key=lambda c: c["need"])[:15]; y["наборы 15×10"] = sum(10 * c["cny"] for c in sets)
-cards = sum(q > 0 for a, q in plan.values()) + 15
+sets = sorted([c for c in F if c["ok_canon"]], key=lambda c: c["need_canon"])[:15]; y["наборы 15×10"] = sum(10 * c["cny"] for c in sets)
+for c in sets: plan[f"набор {c['neck']}+{c['ear']}"] = ("набор 10", 10)   # 29.10: наборы — в том же JSON плана
+cards = sum(q > 0 for a, q in plan.values())
 for k in out: print(f"{k}: {out[k]} поз., ¥{round(y[k])}")
 print(f"наборы 15×10: ¥{round(y['наборы 15×10'])}"); print(f"ИТОГО сразу ¥{round(sum(y.values()))}, новых карточек {cards}")
-print("из «оплатить 50» ровно на 70 баллах:", sum(1 for n, (a, q) in plan.items() if a == "оплатить 50" and s[n - 1]["total"] == 70))
+P = {n: v for n, v in plan.items() if isinstance(n, int)}
+print("ровно 70 баллов: в «оплатить 50» первой волны", sum(1 for n, (a, q) in P.items() if a == "оплатить 50" and s[n - 1]["total"] == 70),
+      "| 70–74 в первой волне", sum(1 for n, (a, q) in P.items() if a.startswith("оплатить") and s[n - 1]["total"] < 75),
+      "| ровно 70 среди всех «оплатить»", sum(1 for r in s if r["decisionCANON"] == "оплатить" and r["total"] == 70))
 json.dump({str(n): v for n, v in plan.items()}, open(f"consensus_plan_cap{CAP}{'_half70' if HALF70 else ''}.json", "w"), ensure_ascii=False)

@@ -2,7 +2,7 @@
 Каждый балл — с причиной. Источники: описание фото от Codex/Kimi (why), китайское название 1688, CLIP по фото,
 проверка фото Claude (photo_review), карточка 1688 (details: вес, размеры, сплав, варианты), срез WB 22.10 (заказы за 30 дней).
 Нет данных — «ожидает проверки», балл 0 с этой причиной."""
-import json, re, statistics as st
+import os, json, re, statistics as st
 
 items = json.load(open("items.json")); clip = json.load(open("clip.json"))
 wb = json.load(open("/Volumes/ADATA SD810/WB/Подбор/wb_slice_2026-10-22/wb_slice.json"))
@@ -110,7 +110,8 @@ def score(it):
     # 5. посадка и качество (15)
     d = it.get("det") or {}
     # 29.10 (ревью Codex): отзывы покупателей вырезаются — «尺寸也正好» («размер подошёл») не размер изделия
-    col = re.sub(r"商品评价\n[\d.]+.*?查看全部评价", "", d.get("colors") or "", flags=re.S)
+    # 29.10 (2-е ревью Codex): обрезанный отзыв (без «查看全部评价») вырезается до конца сохранённого текста
+    col = re.sub(r"商品评价\n[\d.]+.*?(查看全部评价|$)", "", d.get("colors") or "", flags=re.S)
     restored = bool(d.get("restored"))
     q = []
     wt = (d.get("weights") or "").split("商品详情")[0]
@@ -118,24 +119,36 @@ def score(it):
     # 29.10: размер часто в параметрах или названии, а не в таблице 长×宽; значение обязательно с цифрой.
     # Колье и наборы — только длина цепи (周长 41–50 см, 链长, ≥30 см): диаметр бусины «2mm珍珠» не размер изделия.
     # Остальные — без 周长/链长: длина цепочки из соседнего варианта карточки не размер броши.
-    if it["seg"] in NECKSEG:
-        sz = sz or bool(re.search(r"(链长|长度|周长)\t?\n?[^\n\d]{0,6}\d", col + t)) or any(int(v) >= 30 for v in re.findall(r"(\d+)\s*(?:cm|CM|厘米)", col + t))
+    ln = None
+    if it["seg"] in NECKSEG:   # 29.10 (2-е ревью Codex): таблица 长×宽 — размер кулона/упаковки, а не длина цепи. Засчитывается как «размеры есть»
+        # (так сформулирован критерий), но отсутствие длины цепи помечается; строгий режим STRICT_LEN=1 требует длину цепи
+        ln = bool(re.search(r"(链长|长度|周长)\t?\n?[^\n\d]{0,6}\d", col + t)) or any(int(v) >= 30 for v in re.findall(r"(\d+)\s*(?:cm|CM|厘米)", col + t))
+        sz = ln if os.environ.get("STRICT_LEN") == "1" else (sz or ln)
     else:
         sz = sz or bool(re.search(r"\d+\s*(cm|CM|厘米|mm)|(长度|直径)\t?\n?[^\n\d]{0,6}\d", re.sub(r"(周长|链长)\t?\n[^\n]*", "", col) + t + wt))
     wk = it.get("wsrc") == "карточка"
-    q.append((5, "вес и размеры есть в карточке 1688") if (wk and sz) else (0, "ожидает проверки: карточка восстановлена из черновика, размеры не сохранились" if restored else ("ожидает проверки: " + ("размеров нет в карточке" if wk else "вес — допущение, не из карточки"))))
+    q.append((5, "вес и размеры есть в карточке 1688" + ("" if ln is None or ln else "; длина цепи не указана — уточнить у продавца")) if (wk and sz) else (0, "ожидает проверки: карточка восстановлена из черновика, размеры не сохранились" if restored else ("ожидает проверки: " + ("размеров нет в карточке" if wk else "вес — допущение, не из карточки"))))
     w = it["w"] if isinstance(it["w"], (int, float)) else None
     if it["seg"] == "серьги":
         q.append((5, f"вес пары {w} г ≤ 20 (одна ≤ 10 г)") if (wk and w and w <= 20) else (0, f"вес серёг {w} г — тяжелее нормы или не подтверждён"))
     elif it["seg"] in NECKSEG:
         # 29.10 (ревью Codex): «延长链: 无» — удлинителя НЕТ; хвостовая цепочка 尾链 — регулировка есть
-        ex = re.search(r"延长链?\t?\n?([^\n]*)", col + "\n" + t)
-        ext = bool(ex and not re.match(r"\s*(无|没有|否|0\b)", ex.group(1))) or has(r"尾链", col + t)
+        # 2-е ревью: только поле «延长链» с непустым значением (не «延长使用寿命», не обрезанное «延长» в конце); в названии — «延长链»
+        ex = re.search(r"延长链\t\n([^\n]*)", col)
+        ext = (bool(ex.group(1).strip()) and not re.match(r"\s*(无|没有|否|不|0\b)", ex.group(1))) if ex else has(r"延长链", t)
+        ext = ext or has(r"尾链", col + t)
         q.append((5, "указан удлинитель цепи (регулировка)") if ext else (0, "удлинителя нет (延长链: 无) — длина фиксированная" if ex else "регулировка длины не указана — уточнить у продавца"))
+    elif it["seg"] == "брошь":   # 29.10: тяжёлая брошь тянет ткань
+        q.append((5, f"вес броши {w} г ≤ 25") if (wk and w and w <= 25) else (0, f"вес броши {w} г — тяжелее 25 г или не подтверждён"))
+    elif it["seg"] in ("браслет", "кольца набор"):   # 29.10: посадка — регулировка размера
+        # 2-е ревью: «不可调节» — отрицание; «7号» — фиксированный размер кольца, а не регулировка
+        adj = bool(re.search(r"(?<!不)可调|开口|活口|弹力|延长链|伸缩|尾链", col + t))
+        q.append((5, "регулировка размера указана (开口/可调/弹力/延长链)") if adj else (0, "регулировка размера не указана — уточнить у продавца"))
     else:
         q.append((0, "норматив посадки для сегмента не задан"))
     pv = it.get("pv") or ""
-    mat = "材质" in col
+    # 2-е ревью Codex: сплав берётся и из det.material, но только металл (мусорные значения отсекаются)
+    mat = "材质" in col or bool(re.search(r"合金|铜|钛钢|不锈钢|铁|银|金属", d.get("material") or ""))
     q.append((5, f"фото проверено ({pv}), сплав указан в карточке") if (pv.startswith("ок") and pv != "ок, условно" and mat) else (0, ("фото на грани (ок, условно)" if pv == "ок, условно" else "фото проверено") + ("" if mat else "; сплав / покрытие не указаны")))
     R["качество"] = (sum(x for x, _ in q), "; ".join(f"{y} ({x})" for x, y in q))
     # 6. комплектность и подарочность (10)
@@ -143,7 +156,9 @@ def score(it):
     mc = re.search(r"颜色\t?\n([^\n]+)", col)
     rows = [l for l in (d.get("weights") or "").split("商品详情")[0].split("\n")[2:] if "\t" in l and l.strip()]
     # 29.10 (ревью Codex): нет ни списка цветов, ни строк таблицы — варианты неизвестны, а не «один вариант»
-    nvar = len([v for v in re.split(r"[、,，]", mc.group(1)) if v.strip()]) if mc else (len(rows) if rows else None)
+    ncol = len([v for v in re.split(r"[、,，]", mc.group(1)) if v.strip()]) if mc else None
+    nsku = len(re.findall(r"\n库存\d", d.get("weights") or "")) or None   # 29.10: SKU на странице 1688 (по одному «库存» на вариант)
+    nvar = max(v for v in (ncol, nsku) if v) if (ncol or nsku) else (len(rows) if rows else None)
     if it["order"] == "1000-ч2" and it["src"] == "сборный":
         k1 = (5, f"сборная пара проверена по фото ({it.get('pv')}), один металл и мотив") if str(it.get("pv", "")).startswith("ок") else (0, "пара не проверена")
     elif nvar is None:

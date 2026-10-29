@@ -1,10 +1,19 @@
 """Сводная таблица всех позиций действующих заказов (28.10): данные для шкалы v2."""
 import glob, json, os, re, sys
 import openpyxl
+# 29.10 (2-е ревью Codex): серьги-подвески («吊坠耳饰/耳环») ошибочно записаны в заказах как «колье + серьги» — исправлено по названию 1688 и описаниям фото
+SEGFIX = {("100", 23): "серьги", ("100", 24): "серьги", ("100", 93): "серьги", ("200", 112): "серьги", ("200", 167): "серьги",
+          ("1000-ч1", 379): "серьги", ("1000-ч1", 423): "серьги", ("1000-ч1", 612): "серьги"}
 P = "/Volumes/ADATA SD810/WB/Подбор"; W = f"{P}/wb_slice_2026-10-22"; SP = "/private/tmp/claude-501/-Volumes-ADATA-SD810-WB/a25f6ca6-5448-40ba-9e30-e0ec147f4619/scratchpad"
 pool = {p["id"]: p for p in json.load(open(f"{W}/pool_1688.json"))}
 kq = {x["id"]: x for x in json.load(open(f"{W}/kq_sets.json"))}
 det = json.load(open(f"{W}/details.json")); pr = json.load(open(f"{W}/photo_review.json"))
+# 28.10: карточки, восстановленные из черновика после обрыва details.json, заменяются перекачанными (refetch.py → details_refetch.json)
+_rf = os.path.join(os.path.dirname(os.path.abspath(__file__)), "details_refetch.json")
+for _rf in (_rf, _rf.replace("details_refetch.json", "details_refetch2.json")):   # два потока перекачки
+  if os.path.exists(_rf):
+    for _k, _v in json.load(open(_rf)).items():
+        if det.get(_k, {}).get("restored") or _k not in det: det[_k] = _v
 taste = {}
 for f in ["kimi_taste.json", "kimi_taste3.json", "kimi_taste4.json", "kimi_taste5.json", "codex_taste6.json", "codex_taste6a.json", "codex_taste6b.json"] + sorted(glob.glob(f"{W}/codex_taste_w*.json")):
     f = f if f.startswith("/") else f"{W}/{f}"
@@ -39,6 +48,8 @@ for r in openpyxl.load_workbook(f"{P}/Заказ_1000_часть2_комплек
     items.append(dict(order="1000-ч2", row=r[0], group=str(r[3]), src=("сборный" if b else "готовый"), seg=seg, ids=[a] + ([b] if b else []), cny=r[9], w=r[10], wsrc=r[11], P=1330, psrc="верхний ярус 1 330 ₽",
                       roi=r[12], roi1330=r[12], qty=r[15], note=r[17] or "", title=" | ".join((pool.get(x) or kq.get(x) or {}).get("title", "") for x in [a] + ([b] if b else [])),
                       pv=rv, taste=None, why=r[17] or "", like=None, det=det.get(a, {}), imgs=[img(a)] + ([img(b)] if b else []), url=r[5], url2=r[7] if b else None, pair_score=r[14]))
+for _x in items:
+    if (_x["order"], _x["row"]) in SEGFIX: _x["seg"] = SEGFIX[(_x["order"], _x["row"])]
 json.dump(items, open("items.json", "w"), ensure_ascii=False)
 from collections import Counter
 print(len(items), Counter(i["order"] for i in items), "без фото", sum(1 for i in items if not all(i["imgs"])), "без названия", sum(1 for i in items if not i["title"]), "без pv", sum(1 for i in items if not i["pv"]))

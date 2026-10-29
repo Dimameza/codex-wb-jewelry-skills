@@ -1,0 +1,1605 @@
+• Let me start by exploring the working directory to understand the structure and files involved. The user wants a re-review of fixes for jewelry evaluation. I need to:
+
+  1. Check rules 1-5 in score.py (blocks "5. посадка и качество" and "6. комплектность")
+  2. Check norms for brooches, bracelets, rings
+  3. Check sets_canon.py and consensus_canon.py for double-counting ¥
+  4. Verify numbers match scored.json and consensus_plan_cap*.json / consensus_qty_cap*.json
+  5. Find other errors in scale or data
+
+  Let me first look at the key files. Note the working directory is `/Volumes/ADATA SD810/WB/Подбор/оценка_test29` but the user mentions `METHOD.txt` and files. The listing shows `._METHOD.txt` — files seem to have `._` prefixes. Let me explore.
+
+  I should probably use explore agents for the investigation, but given the complexity, maybe do it myself with targeted reads. Let me start by listing the directory properly.
+
+  The task says "Проверки — python-скриптами, только чтение" — checks via python scripts, read-only.
+
+  Let me plan:
+  1. List directory, find key files: score.py, price_check_canon.py, consensus_canon.py, sets_canon.py, refetch16.py, METHOD.txt (rendered as ._._METHOD.txt in the tree?), scored.json, consensus_plan_cap*.json, consensus_qty_cap*.json, review_codex_fix_2026-10-29.md (user says it's here in the working folder).
+  2. Read the relevant blocks of score.py.
+  3. Run python checks to verify numbers.
+
+  Given the size, I'll delegate some verification to subagents? Actually the instruction says I'm the critic; I can do it directly. Let me first look at the files.
+
+  Let me start.
+
+• Начну с обзора структуры папки и ключевых файлов.total 557056
+drwx------@ 1 dmitrijmizinov  staff    524288 Oct 29 22:32 .
+drwx------  1 dmitrijmizinov  staff    524288 Oct 29 13:22 ..
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._._METHOD.txt
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._apply_dups.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._apply_eye.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._assemble.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._canon_fit.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._check_0.jpg
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._check_0.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._clip.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._clip_tags.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._._consensus_canon.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._consensus_plan.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._._consensus_plan_cap0.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._._consensus_plan_cap3.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._._consensus_plan_cap3_half70.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._._consensus_qty_cap0.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._._consensus_qty_cap3.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._._consensus_qty_cap3_half70.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._details_refetch.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._details_refetch2.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._details_refetch_before16.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._export.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 13:22 ._._eye
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._._items.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._items_before_refetch.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._market_sheet.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._orders_plan.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 13:22 ._._plan_thumbs
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._price_check.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._price_check_canon.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._price_check_spp.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._refetch.log
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._refetch.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._refetch16.log
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._refetch16.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._refetch2.log
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._refetch2.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._refetch_ids.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._refetch_ids16.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._._score.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._score_before_codexfix.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._score_before_fix29.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._._score_before_round3.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._._scored.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._scored_before_3desc.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._scored_before_canon.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._._scored_before_codexfix.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._scored_before_eye.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._scored_before_fix29.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._scored_before_pricecheck.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._scored_before_refetch.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._scored_before_rhine.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._._scored_before_round3.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._scored_before_sculpt.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._sensitivity.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:31 ._._sheets.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 13:22 ._._style
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 13:22 ._._дубли
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 13:22 ._._наборы_серьги
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 13:22 ._._стили
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 28 06:42 ._METHOD.txt
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 28 23:59 ._apply_dups.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 28 06:53 ._apply_eye.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 28 06:37 ._assemble.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._brief_kimi2.md
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 28 14:58 ._canon_fit.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 28 06:41 ._check_0.jpg
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 28 06:41 ._check_0.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 28 06:39 ._clip.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 28 06:38 ._clip_tags.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 28 23:59 ._consensus_canon.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 28 14:54 ._consensus_plan.py
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._consensus_plan_cap0.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._consensus_plan_cap3.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._consensus_plan_cap3_half70.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._consensus_qty_cap0.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._consensus_qty_cap3.json
+-rwx------  1 dmitrijmizinov  staff      4096 Oct 29 22:32 ._consensus_qty_cap3_half70.json
+наборы_серьги/:
+total 79872
+drwx------@ 1 dmitrijmizinov  staff  524288 Oct 29 13:18 .
+drwx------@ 1 dmitrijmizinov  staff  524288 Oct 29 22:32 ..
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._embed.py
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._eye1.json
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._eye_final.json
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._final_sets.json
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:32 ._._final_sets_canon.json
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._hits.json
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._hits.py
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._hits_0.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._hits_1.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._hits_2.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._hits_3.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._hits_4.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._hits_5.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._hits_6.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._index.json
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._ours.npy
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._pairs.json
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._pairs.py
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._pairs_0.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._pairs_1.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._pairs_2.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._pairs_3.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._sets_canon.py
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 13:22 ._._thumbs
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:31 ._._wb.npy
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:02 ._embed.py
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:08 ._eye1.json
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:09 ._eye_final.json
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:09 ._final_sets.json
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 22:32 ._final_sets_canon.json
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:06 ._hits.json
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:06 ._hits.py
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:06 ._hits_0.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:06 ._hits_1.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:06 ._hits_2.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:06 ._hits_3.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:06 ._hits_4.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:06 ._hits_5.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:06 ._hits_6.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:06 ._index.json
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:06 ._ours.npy
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:07 ._pairs.json
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:07 ._pairs.py
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:08 ._pairs_0.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:08 ._pairs_1.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:08 ._pairs_2.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:08 ._pairs_3.jpg
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 29 13:18 ._sets_canon.py
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:09 ._thumbs
+-rwx------  1 dmitrijmizinov  staff    4096 Oct 28 14:06 ._wb.npy
+-rwx------@ 1 dmitrijmizinov  staff    1775 Oct 28 14:02 embed.py
+-rwx------@ 1 dmitrijmizinov  staff     695 Oct 28 14:08 eye1.json
+-rwx------@ 1 dmitrijmizinov  staff     817 Oct 28 14:09 eye_final.json
+-rwx------@ 1 dmitrijmizinov  staff   13696 Oct 28 14:09 final_sets.json
+-rwx------@ 1 dmitrijmizinov  staff   20709 Oct 29 22:32 final_sets_canon.json
+-rwx------@ 1 dmitrijmizinov  staff   23736 Oct 28 14:06 hits.json
+
+
+• There are AppleDouble files (`._*` and `. _*`) — the `._` prefixed are macOS metadata files. Real files are the ones without prefix (e.g., `score.py`, `METHOD.txt`). Let me list the real files.
+
+• Файлы с `._` — служебные AppleDouble. Посмотрю реальные файлы.557056 
+METHOD.txt 7169
+apply_dups.py 1014
+apply_eye.py 3269
+assemble.py 5084
+brief_kimi2.md 5173
+canon_fit.json 98
+check_0.jpg 505656
+check_0.json 15458
+clip.json 556781
+clip_tags.py 1993
+consensus_canon.py 4821
+consensus_plan.py 3554
+consensus_plan_cap0.json 37727
+consensus_plan_cap3.json 53055
+consensus_plan_cap3_half70.json 57024
+consensus_qty_cap0.json 11148
+consensus_qty_cap3.json 5764
+consensus_qty_cap3_half70.json 5764
+details_refetch.json 5211129
+details_refetch2.json 2
+details_refetch_before16.json 5099131
+export.py 5638
+items.json 11459762
+items_before_refetch.json 6435331
+market_sheet.py 2337
+orders_plan.py 8139
+price_check.py 4717
+price_check_canon.py 4386
+price_check_spp.py 4376
+refetch.log 19120
+refetch.py 2049
+refetch16.log 398
+refetch16.py 2166
+refetch2.log 7310
+refetch2.py 2206
+refetch_ids.json 11957
+refetch_ids16.json 262
+review_codex_fix_2026-10-29.md 6836
+score.py 19074
+score_before_codexfix.py 16463
+score_before_fix29.py 15682
+score_before_round3.py 18008
+scored.json 17871176
+scored_before_3desc.json 9389759
+scored_before_canon.json 12419274
+scored_before_codexfix.json 17760283
+scored_before_eye.json 9262769
+scored_before_fix29.json 17750419
+scored_before_pricecheck.json 10854317
+scored_before_refetch.json 12875153
+scored_before_rhine.json 9387710
+scored_before_round3.json 17868984
+scored_before_sculpt.json 12421873
+scored_ref.json 17868984
+sensitivity.py 2509
+sheets.py 1812
+
+
+• Now let me read the key files:
+  1. `review_codex_fix_2026-10-29.md` — previous review
+  2. `METHOD.txt` — methodology
+  3. `score.py` — the main file with blocks 5 and 6
+  4. `consensus_canon.py`, `price_check_canon.py`
+  5. `наборы_серьги/sets_canon.py`
+
+  Let me read them in parallel.
+
+• Читаю ключевые файлы: предыдущее ревью, методику, score.py.
+
+• Now let me read `consensus_canon.py`, `price_check_canon.py`, `наборы_серьги/sets_canon.py`, and the `consensus_plan_cap*.json` / `consensus_qty_cap*.json` files.
+
+• Теперь читаю скрипты планов и канонических наборов.
+
+• Now let me set up verification. I need to check:
+
+  1. Rules 1–5 in score.py — logic correctness with actual data (find false positives/negatives with item numbers).
+  2. Norms for brooches (≤25 g), bracelets and ring sets (adjustability regex) — are they justified?
+  3. sets_canon.py correctness and double-counting of ¥ in consensus_canon.py (sets counted as necklace ¥ + earrings ¥ × 10?).
+  4. Numbers in the summary vs scored.json / consensus_plan_cap*.json / consensus_qty_cap*.json.
+  5. Other issues.
+
+  Key questions to verify:
+
+  Q3 about double-counting: In `consensus_canon.py`:
+  - Line 27: `sets = sorted(...15 cheapest ok_canon...); y["наборы 15×10"] = sum(10 * c["cny"] for c in sets)` — the ¥ for sets. What's `c["cny"]`? Need to check final_sets.json structure — presumably the set price (necklace + earrings price). And then `comp` adds component quantities to per-item order quantities in `total_q` (consensus_qty JSON) — but that JSON only has quantities, no ¥. The plan JSON (consensus_plan_cap*.json) has plan[n] = (a, q) for per-item and `набор {neck}+{ear}`: ("набор 10", 10).
+
+  Potential double counting: if a component (necklace or earrings) is ALSO ordered individually (e.g., №114: 10 шт поштучно + 40 в наборы), then ¥ is counted once in "наборы" line (10×cny where cny = set price) and once in the individual line (cny × q). That's NOT double counting if the set price `c["cny"]` is the price of the SET as sold by 1688 (one SKU = necklace+earrings together). Need to check final_sets.json: does cny represent the combined price of neck+ear bought as one set SKU? Let me check `наборы_серьги/pairs.py` to see how final_sets.json was built.
+
+  Actually wait — the user's question 3 says "Нет ли двойного учёта ¥ (наборы считаются по ¥ колье + ¥ серёг × 10)?" — implying sets are priced as necklace ¥ + earrings ¥ (sum of components), ×10 sets. If the same necklace is also ordered 10 pcs individually, then the necklace ¥ is counted twice: once individually and once as part of set price — but that's fine if you actually buy both (10 individual necklaces + 40 necklaces inside sets). Actually that's legitimate: you buy 10 necklaces individually AND 40 sets (each containing a necklace). Total necklaces received = 50, total ¥ = 10×neck¥ + 40×set¥. That's correct accounting IF the set on 1688 is actually sold as a combined SKU at the sum price.
+
+  But wait — there's a subtlety: are the "наборы" bought from 1688 as a single SKU (necklace+earrings together), or assembled from separate necklace SKU + earrings SKU? If assembled from separate SKUs, then total ¥ should be 10×neck¥ + 40×(neck¥+ear¥)... no wait. Let me re-read.
+
+  From METHOD and prior review: pairs.py matched necklaces from our order with WB earrings? Let me look at pairs.py and final_sets.json to understand.
+
+  Actually, from the numbers: "Компоненты наборов: 22 позиции; №114 — 10 шт поштучно + 40 в наборы". So sets consist of necklace+earring components matched from the 1485 items. The set price cny = cny of necklace + cny of earrings presumably.
+
+  The potential double-count issue: ¥ total = per-item orders + 10×set_cny for each set. If a necklace is ordered individually (say 50 pcs) AND used in 10 sets, then we count its ¥ twice: 50× in individual + 10× in sets. But physically we need 60 necklaces, so we should pay for 60. If the ¥ totals are used as "how much to pay 1688", then counting 50 individual + 10 sets (each set includes necklace) = correct payment for 60 necklaces. So no double counting in the money sense — as long as the plan quantities JSON (consensus_qty) reflects the total quantities to order (50+10=60 for that SKU).
+
+  But there's another possible issue: the per-item plan already includes positions that are "оплатить 50" etc. If the set's necklace component is ALSO in the plan as "оплатить 50", then buying 50 individually + 10 sets means 60 necklaces — fine.
+
+  Hmm, but wait — is there double counting if the set is counted at (neck¥ + ear¥)×10 while ALSO the same necklace/earring positions are in the plan with their own ¥? That's only double counting if the sets are assembled FROM the individually-ordered stock (i.e., you buy 50 necklaces and 10 of them are diverted into sets). Then total cost would be 50×neck¥ + 10×ear¥, not 50×neck¥ + 10×(neck¥+ear¥). The difference: 10×neck¥ extra.
+
+  Which is correct depends on interpretation. If sets are assembled from own stock, the cost of the set's necklace is already paid in the individual order — adding set ¥ double counts the necklace cost. If sets are bought as separate SKUs from 1688, no double counting.
+
+  From pairs.py (need to read), the sets were formed by pairing a 1688 necklace from our order with WB earrings? Let me read pairs.py and hits.py. Actually "наборы_серьги" means "necklace+earrings sets" — pairing our necklace items with earring items to create sets sold on WB. The WB market check: "комплект бижутерии колье и серьги" — WB sets. So the sets are virtual: take necklace from 1688 order + earrings from 1688 order, sell as a set on WB. In that case, buying 10 sets = buying 10 necklaces + 10 earrings. If those necklaces/earrings are ALSO ordered individually, the total quantity needed is individual qty + set qty. The ¥ = individual orders + 10×(neck¥+ear¥). That is NOT double counting — you actually need to buy extra units.
+
+  BUT: if the same physical units serve both (you buy 50 necklaces and assemble 10 sets from them, selling only 40 necklaces individually + 10 sets), then paying 50×neck + 10×(neck+ear) double counts 10×neck. The consensus_qty JSON says №114: 10 поштучно + 40 в наборы — wait, that's the opposite: 40 necklaces go into sets (15 sets × 10 = ... hmm 15 sets × 10 pcs each = 150 sets?? No wait).
+
+  Hold on: `sets = sorted(...)[:15]; y["наборы 15×10"] = sum(10 * c["cny"] for c in sets)` — 15 sets × 10 pieces each = 150 set-units. `comp[c["neck"]] += 10` — each component gets +10 per set. So if №114 is a component in 4 different sets (as earrings), it gets +40.
+
+  "consensus_qty_cap*.json" contains total quantities per position (individual + components). So №114: plan says 10 (тест?) + 40 в наборы.
+
+  Now the money: total ¥ = sum of individual ¥ (plan) + sum over sets of 10×(neck_cny + ear_cny). If №114 is ordered 10 pcs individually at ¥X each AND included in 4 sets ×10 = 40 pcs, total ¥ for №114 = 10X + 40X = 50X — paying for 50 units. Correct if we need 50 units.
+
+  So the accounting is consistent IF sets are virtual combos requiring extra units. The only real question is whether the 1688 set price cny = neck cny + ear cny (no bundle discount). Let me check final_sets.json fields.
+
+  Let me now check the numbers. The user claims:
+  - Решения: оплатить 459, тест 636, не брать 387 (баллы <55 — 303, цена не подтверждена — 73, стоп-фактор — 11), дубли 3.
+  - Нулей: качество 137, комплектность 1 065.
+  - Варианты: широкий ¥248 472 / 996 карточек; строгий ¥196 265 / 517; рекомендованный ¥151 675 / 517.
+
+  Previous review said plans were ¥248 042/995, ¥195 969/516, ¥151 319/516. New numbers slightly higher (248 472/996 etc.) — consistent with 16 refetched items now having cards (adding 1 card each? Actually +1 card in each plan).
+
+  Checks to run:
+  1. Load scored.json, count decisions: decisionCANON Counter.
+  2. Count zeros in качество and комплектность.
+  3. Load consensus_plan_cap0.json, cap3, cap3_half70; compute sums of cny×q + sets; count cards.
+  4. Check the rules in score.py against items.json data — find false positives/negatives:
+     - Rule 1: reviews cut — check regex works on actual colors text.
+     - Rule 2: size rules — check specific items: №965 (2mm珍珠项链), №364 (brooch with 周长), №189/912 (reviews).
+     - Rule 3: extender — check 无 handling, 尾链.
+     - Rule 4: variants — check SKU counting via 库存, colors list.
+     - Rule 5: norms.
+  5. Verify sets_canon.py math: inv = 12.72*cny + 22 + 0.285*(W(a)+W(b)) + 20 — uses weights of both components. need formula: (inv*k - b)/(a - DRR). Check canon_fit.json.
+  6. Check refetch16: 16 positions have det now.
+
+  Also there's `brief_kimi2.md` — maybe the brief for this round. Let me read it too.
+
+  And `score_before_round3.py` vs `score.py` diff to see what changed in round 3.
+
+  Let me also check `consensus_qty` files content.
+
+  Plan of checks (read-only python):
+
+  Script 1: decisions & zeros & totals.
+  Script 2: recompute plan sums from scored.json + consensus_plan jsons.
+  Script 3: spot-check rules on specific items (№6, 37, 189, 364, 912, 965, 995, 1163, 1172, 1184, 32-49).
+  Script 4: sets_canon checks — verify cny = neck cny + ear cny, verify no overlap issues, verify consensus_qty sums.
+  Script 5: check the regex rules for bugs — e.g., the size regex `(链长|长度|周长)\t?\n?[^\n\d]{0,6}\d` — this matches any line starting with 链长/长度/周长 followed within 6 chars by a digit. But `[^\n\d]{0,6}` allows crossing tab. Also in the non-neck branch, `re.sub(r"(周长|链长)\t?\n[^\n]*", "", col)` removes 周长/链长 lines — but only when followed by tab-newline? `\t?\n` — optional tab then newline. In colors text, the format seems to be `key\nvalue` or `key\tvalue`? Need to check actual format.
+
+  Also rule: `sz = bool(re.search(r"长\(cm\)\t宽\(cm\)[^\n]*\n[^\n]*\t\d", wt))` — checks table header 长(cm)\t宽(cm) then next line contains tab-digit.
+
+  The `ncol` regex `颜色\t?\n([^\n]+)` — colors list from col. Format: "颜色\n红色、蓝色" presumably.
+
+  `nsku = len(re.findall(r"\n库存\d", d.get("weights") or ""))` — counts lines starting with 库存 followed by digit. Hmm, `库存` might appear in different formats, e.g. "库存123件" or "库存：123" or "库存\t123". `\n库存\d` requires digit right after 库存 with no space/colon/tab. Need to check actual weights format. Also weights table might have multiple columns and 库存 rows. Also the table header rows: `.split("\n")[2:]` skips 2 header lines.
+
+  Important subtlety: `nsku` counts from `d.get("weights")` — the raw weights text INCLUDING the tail of page that was previously a problem? In block 6 they use `rows` from weights (split by 商品详情, skip 2 header lines) only as fallback when neither ncol nor nsku. Actually `nvar = max(ncol, nsku) if either else len(rows)`. So rows count used only if both ncol and nsku are None.
+
+  But wait — 库存 count: each SKU row on the 1688 page has "库存N"? If the weights table lists each variant with its stock... The previous issue: "таблица весов захватывала хвост страницы и завышала варианты: 347 позиций +5, 34 позицы −5". So they switched to colors list. Now they take max(colors, 库存-count). Hmm — max of the two. If colors list has 3 colors but page has 12 SKUs (size × color), max=12 → "не распознаны... 12 вариантов" → 0 points. Actually is that wrong? WB question: number of variants matters because you must choose a variant before buying. Colors list = color variants. SKU count = actual SKUs. Taking max is conservative (penalizes more). But it can over-penalize: a card with 3 colors × 4 sizes = 12 SKUs but colors only 3 — max=12 → 0 points "12 вариантов". But per METHOD, "5 — один вариант в карточке" — meaning single variant. Is the intent "one variant total" or "one color"? METHOD says "один вариант в карточке или проверенная сборная пара". So any multi-variant card → 0. Max() is conservative. But could also be lenient if colors list is long but actually one SKU each... The max choice — is it justified? If colors = 12 names and 库存 count = 3... max=12. Either way >1 → 0. Max only matters when one of them is 1: e.g., colors list = 1 ("颜色\n红色"), 库存 count = 5 → max=5 → 0 points. Is that correct? If the page has 5 SKUs but one color, there might be 5 sizes. Conservative. Or colors = 5, 库存 = 1 → max=5 → 0. If the page genuinely has 1 SKU in stock but 5 colors listed... then colors suggest you must choose. Hmm, 库存 count counts SKUs with 库存\d pattern — if only one SKU has a stock line, maybe others are out of stock (库存0?). Pattern 库存\d would match 库存0. Hmm wait "库存0" — matches \n库存\d with \d=0. So nsku counts zero-stock SKUs too. OK.
+
+  Edge: 库存 may appear as "库存：1,234" with colon or comma. Then `\n库存\d` fails → nsku=None. Let me check actual data format.
+
+  Let me also check items 32-40, 42, 44-49 for det presence now.
+
+  Also check duplicates "дубли 3" — apply_dups.py? Not critical.
+
+  Let me now check `brief_kimi2.md` for context, and then run verification scripts.
+
+• Читаю brief и вспомогательные файлы наборов, затем запущу проверки скриптами.[
+ {
+  "neck": 550,
+  "ear": 677,
+  "sim": 0.65,
+  "cny": 20.9,
+  "cost": 294,
+  "need": 2133,
+  "thr": 1386,
+  "market": 8,
+  "fresh": 4,
+  "ok": true,
+  "neck_total": 65,
+  "neck_dec": "не брать (цена не подтверждена)",
+  "eye": false
+ },
+ {
+  "neck": 580,
+  "ear": 677,
+  "sim": 0.646,
+  "cny": 19.7,
+  "cost": 278,
+  "need": 2040,
+  "thr": 1326,
+  "market": 16,
+  "fresh": 5,
+  "ok": true,
+  "neck_total": 54,
+  "neck_dec": "не брать (баллы < 55)",
+  "eye": false
+ },
+ {
+  "neck": 1143,
+  "ear": 112,
+  "sim": 0.638,
+  "cny": 21.5,
+  "cost": 303,
+  "need": 2190,
+  "thr": 1423,
+  "market": 7,
+  "fresh": 4,
+  "ok": true,
+  "neck_total": 59,
+  "neck_dec": "не брать (цена не подтверждена)",
+  "eye": false
+ },
+ {
+  "neck": 1171,
+  "ear": 108,
+  "sim": 0.63,
+  "cny": 17.7,
+  "cost": 271,
+  "need": 1997,
+  "thr": 1298,
+  "market": 18,
+  "fresh": 6,
+  "ok": true,
+  "neck_total": 55,
+  "neck_dec": "не брать (цена не подтверждена)",
+  "eye": false
+ },
+ {
+  "neck": 563,
+  "ear": 731,
+  "sim": 0.615,
+  "cny": 15.69,
+  "cost": 237,
+  "need": 1795,
+  "thr": 1166,
+  "market": 30,
+  "fresh": 12,
+  "ok": true,
+  "neck_total": 49,
+  "neck_dec": "не брать (баллы < 55)",
+  "eye": false
+ },
+ {
+  "neck": 901,
+  "ear": 199,
+  "sim": 0.594,
+  "cny": 13.62,
+  "cost": 204,
+  "need": 1599,
+  "thr": 1039,
+  "market": 47,
+  "fresh": 17,
+  "ok": true,
+  "neck_total": 60,
+  "neck_dec": "тест 20–30 шт",
+  "eye": false
+ },
+ {
+  "neck": 553,
+  "ear": 836,
+  "sim": 0.581,
+  "cny": 20.26,
+  "cost": 308,
+  "need": 2220,
+  "thr": 1443,
+  "market": 5,
+  "fresh": 3,
+  "ok": true,
+  "neck_total": 60,
+  "neck_dec": "не брать (цена не подтверждена)",
+  "eye": false
+ },
+ {
+  "neck": 587,
+  "ear": 113,
+  "sim": 0.57,
+  "cny": 14.7,
+  "cost": 232,
+  "need": 1769,
+  "thr": 1150,
+  "market": 32,
+  "fresh": 14,
+  "ok": true,
+  "neck_total": 54,
+  "neck_dec": "не брать (баллы < 55)",
+  "eye": false
+ },
+ {
+  "neck": 564,
+  "ear": 199,
+  "sim": 0.563,
+  "cny": 15.22,
+  "cost": 240,
+  "need": 1817,
+  "thr": 1181,
+  "market": 30,
+  "fresh": 12,
+  "ok": true,
+  "neck_total": 39,
+  "neck_dec": "не брать (баллы < 55)",
+  "eye": false
+ },
+ {
+  "neck": 516,
+  "ear": 897,
+  "sim": 0.537,
+  "cny": 19.6,
+  "cost": 282,
+  "need": 2067,
+  "thr": 1343,
+  "market": 12,
+  "fresh": 5,
+  "ok": true,
+  "neck_total": 60,
+  "neck_dec": "тест 20–30 шт",
+  "eye": false
+ },
+ {
+  "neck": 512,
+  "ear": 376,
+  "sim": 0.755,
+  "cny": 15.8,
+  "cost": 229,
+  "need": 1747,
+  "thr": 1136,
+  "market": 35,
+  "fresh": 14,
+  "ok": true,
+  "neck_total": 54,
+  "neck_dec": "не брать (баллы < 55)",
+  "eye": true
+ },
+ {
+  "neck": 593,
+  "ear": 677,
+  "sim": 0.753,
+  "cny": 20.35,
+  "cost": 291,
+  "need": 2115,
+  "thr": 1375,
+  "market": 10,
+  "fresh": 5,
+  "ok": true,
+  "neck_total": 54,
+  "neck_dec": "не брать (баллы < 55)",
+  "eye": true
+ },
+ {
+  "neck
+
+====
+56
+{
+ "neck": 550,
+ "ear": 677,
+ "sim": 0.65,
+ "cny": 20.9,
+ "cost": 294,
+ "need": 2133,
+ "thr": 1386,
+ "market": 8,
+ "fresh": 4,
+ "ok": true,
+ "neck_total": 65,
+ "neck_dec": "не брать (цена не подтверждена)",
+ "eye": false,
+ "need_canon": 1614,
+ "thr_canon": 1049,
+ "market_canon": 45,
+ "fresh_canon": 16,
+ "ok_canon": true,
+ "headroom": 0.77
+}
+ok_canon: 56
+
+
+• Interesting — all 56 sets pass canon now (ok_canon: 56). Note in the first example: need was 2133, need_canon 1614 — big change.
+
+  Now let me run the verification scripts. First: decisions and zeros from scored.json. Then verify plan numbers. Then rule checks.
+
+  Let me write a comprehensive read-only check script.
+
+• Проверяю цифры решений и нулей по `scored.json`.n = 1485
+decisionCANON: Counter({'тест 20–30 шт': 636, 'оплатить': 459, 'не брать (баллы < 55)': 303, 'не брать (цена не подтверждена)': 73, 'не брать (стоп-фактор)': 11, 'не брать (дубль №1133)': 1, 'не брать (дубль №273)': 1, 'не брать (дубль №106)': 1})
+качество 0: 137
+комплектность 0: 1065
+стоп-факторы: 11
+total==70: 232
+экономика: Counter({'не проходит': 1482, 'проходит': 3})
+cap0: позиций с qty>0: 981, карточек+наборы: 996, поштучно ¥246584, наборы ¥1887, ИТОГО ¥248472, наборов 15
+  qty entries: 990 sum qty: 25790
+cap3: позиций с qty>0: 502, карточек+наборы: 517, поштучно ¥194378, наборы ¥1887, ИТОГО ¥196265, наборов 15
+  qty entries: 518 sum qty: 21000
+cap3_half70: позиций с qty>0: 502, карточек+наборы: 517, поштучно ¥149788, наборы ¥1887, ИТОГО ¥151675, наборов 15
+  qty entries: 518 sum qty: 16275
+
+
+• Numbers match the brief:
+  - оплатить 459, тест 636, не брать 387 = 303+73+11 = 387. ✓ Plus 3 дубля separately.
+  - качество 0: 137 ✓, комплектность 0: 1065 ✓
+  - Широкий ¥248 472 / 996 ✓, строгий ¥196 265 / 517 ✓, рекомендованный ¥151 675 / 517 ✓
+
+  Wait — "экономика: не проходит 1482, проходит 3" — that's odd! The `econ` function in score.py (the v2 honest-median filter) almost never passes. That's the OLD filter; decisions are made by decisionCANON from price_check_canon.py. OK fine.
+
+  Note: cap0 qty entries 990 vs 981 int positions + 15 sets... wait qty file has 990 entries vs plan 996 cards. Hmm, plan includes 15 набор keys + 981 int = 996 keys. qty has 990 entries. Let me check: total_q includes only positions with q>0 (plan ints with qty + components). plan ints with qty>0: 981. Components from 15 sets: 30 components but some overlap (earrings reused in up to 4 sets; comp counts total per position). 981 + components-not-already-in-plan. 990 - 981 = 9 positions that are only in sets? The brief says "16 позиций в рекомендованном варианте закупаются только для наборов" — for cap3_half70. Let me check that specifically.
+
+  Also check №114: 10 поштучно + 40 в наборы.
+
+  Wait, actually the plan qty for №114: HIT set = {108, 111, 114, 199} → forced to тест. In cap3_half70... Let me verify.
+
+  Now the sets ¥1887 — interesting: sum(10*c['cny'] for 15 cheapest by need_canon). The first set in final_sets_canon sorted by need_canon: 1614 need, cny 20.9... 15 cheapest ×10. Total ¥1887 → avg ¥12.58 per set? That seems low — cny values like 20.9, 19.7, 21.5... Hmm, 15 sets × ~12.6 avg. Wait — sorted by need_canon ascending, 15 cheapest. Need_canon depends on cny. Cheapest sets would have lowest cny. OK plausible.
+
+  Now — double counting check (Q3). Key question: does the "наборы ¥1887" double-count components already ordered individually? As analyzed: sets are virtual combos; comp quantities are ADDED to individual quantities in consensus_qty. So money: individual orders pay for individual qty; sets pay for 10 more of each component. Total payable = consistent with total units. No double counting IF the buyer actually needs extra units for sets. But wait — there's a subtle issue: if a necklace is planned "оплатить 50" AND used in 10 sets, the qty JSON says 60. You pay 50× individually + 10× as part of set price = 60× total. Consistent. Good.
+
+  But there's another potential double-count: y[a] += r["cny"] * q uses r["cny"] — is cny the price of the most expensive variant (per METHOD limitation: "¥ — самый дорогой вариант")? That's a known limitation, not new.
+
+  Another issue in sets_canon.py: `inv = 12.72 * c["cny"] + 22 + 0.285 * (W(a) + W(b)) + 20` — one ФФ fee 22 ₽ for the set (fine, one parcel item... actually 1688 order fee is per order/position, but let's not nitpick). Weight: sum of both components — fine for cargo.
+
+  But `need = (inv * CF["k"] - CF["b"]) / (CF["a"] - DRR)` — matches price_check_canon formula. ✓. Let me check canon_fit.json values.
+
+  One more check: in sets_canon, market pool: same 3 queries, orders30>=30, ok = price >= thr, need >=5 and >=1 fresh. Same logic as price_check_canon. ✓
+
+  But note: pairs.py HIT list vs final sets — sets were capped by MAXUSE=4 per earring pair. In consensus_canon.py, comp adds +10 per set occurrence; an earring used in 4 sets gets +40. OK.
+
+  Now the "16 позиций в рекомендованном варианте закупаются только для наборов" — check cap3_half70 qty vs plan.
+
+  Next: check the actual score.py rules against data. Let me now examine specific items and hunt for false positives/negatives.
+
+  Key checks:
+  1. Review-cut regex on actual colors data.
+  2. Size rules: №965, №364, №189, №912.
+  3. Extender: №995, 1163, 1172, 1184; 尾链 №965.
+  4. Variants: SKU counting via 库存 format; colors list parsing.
+  5. New norms: brooch weight ≤25 (check actual weights distribution), bracelets adj, rings adj.
+
+  Let me write a diagnostic script that replicates score.py logic for blocks 5-6 and reports edge cases.компонентов: 22
+только в наборах (cap3_half70): 16 [64, 105, 108, 111, 113, 122, 199, 459, 480, 500, 520, 531, 540, 545, 577, 1055]
+№114 plan: ['тест 10', 10] qty: 50 cny: 5.1
+№114 в наборах: [(53, 114), (545, 114), (577, 114), (1055, 114)]
+расхождения qty: [] всего 0
+53 + 114 cny 11.0 need_canon 1048 headroom 1.18
+509 + 105 cny 11.1 need_canon 1050 headroom 1.18
+481 + 105 cny 11.9 need_canon 1105 headroom 1.12
+545 + 114 cny 11.9 need_canon 1116 headroom 1.11
+531 + 108 cny 12.4 need_canon 1123 headroom 1.11
+520 + 111 cny 12.1 need_canon 1137 headroom 1.09
+480 + 111 cny 12.0 need_canon 1173 headroom 1.06
+459 + 122 cny 12.5 need_canon 1176 headroom 1.06
+540 + 111 cny 13.0 need_canon 1177 headroom 1.06
+901 + 199 cny 13.62 need_canon 1188 headroom 1.04
+500 + 108 cny 13.7 need_canon 1199 headroom 1.04
+64 + 113 cny 13.4 need_canon 1206 headroom 1.03
+577 + 114 cny 13.9 need_canon 1217 headroom 1.02
+1055 + 114 cny 13.6 need_canon 1218 headroom 1.02
+398 + 113 cny 12.6 need_canon 1244 headroom 1.0
+canon_fit: {'a': 0.5589215368776722, 'b': -58.262926320830346, 'k': 2.1764705882352944, 'drr': 0.1, 'n': 203}
+6 чокер | restored: None | w: 30 wsrc: допущение
+   weights: 
+   colors: 
+37 Г крест | restored: None | w: 12 wsrc: карточка
+   weights: 商品件重尺\n长(cm)	宽(cm)	高(cm)	体积(cm³)	重量(g)	箱规\n2	2	2	8	12	\n\n外箱:10*10*10cm\n\n数量:12 件/箱\n\n净重:0.194 kg\n\n商品详情\n【平台活动下价格】\n活动前价格：（1）非分销场景下，指平台活动（不含分销场景的活动）预热期（若无预热期，则为爆发期）前的商品销售价格；（2）分销场景下，专指分销活动预热期（若无预热期，则为爆发期）前的商品
+   colors: 颜色	\n金色、银色\n\n有可授权的自有品牌	\n否\n\n是否跨境出口专供货源	\n是\n\n上市年份/季节	\n2026年夏季\n\n风格	\n小众风\n\n适用场景	\n日常\n\n重量	\n12\n\n风格分类	\n文艺复古\n\n主要销售地区	\n非洲、欧洲、南美、东南亚、北美、东北亚、中东\n\n适用人群	\n女式\n\n是否IP授权	\n否\n\n
+189 браслет | restored: None | w: 60 wsrc: карточка
+   weights: 商品件重尺通过AI数据校验准确\n重量(g)\n60\n商品详情\n【平台活动下价格】\n活动前价格：（1）非分销场景下，指平台活动（不含分销场景的活动）预热期（若无预热期，则为爆发期）前的商品销售价格；（2）分销场景下，专指分销活动预热期（若无预热期，则为爆发期）前的商品销售价格。\n前述价格未计算平台发放的各种采购津贴、跨店券、红包等优惠，未计算商家设置的满减优惠、优惠券、店铺返利金、店铺会员折扣以及L会
+   colors: 颜色	\n金色单只 2022、白K单只 2022\n\n是否跨境出口专供货源	\n是\n\n上市年份/季节	\n2022年秋季\n\n重量	\n50\n\n风格分类	\n个性风潮\n\n主要销售地区	\n非洲、欧洲、南美、东南亚、北美、东北亚、中东\n\n流行元素分类	\n几何\n全部参数\n商品评价\n商品属性\n包装信息\n商品详情\n同款推荐
+364 брошь | restored: None | w: 30 wsrc: карточка
+   weights: 商品件重尺\n重量(g)\n30\n商品详情\n【平台活动下价格】\n活动前价格：（1）非分销场景下，指平台活动（不含分销场景的活动）预热期（若无预热期，则为爆发期）前的商品销售价格；（2）分销场景下，专指分销活动预热期（若无预热期，则为爆发期）前的商品销售价格。\n前述价格未计算平台发放的各种采购津贴、跨店券、红包等优惠，未计算商家设置的满减优惠、优惠券、店铺返利金、店铺会员折扣以及L会员价、商家设置的指定
+   colors: 颜色	\n毛衣链金色、毛衣链银色、胸针金色、胸针银色\n\n主要销售地区	\n非洲、欧洲、南美、东南亚、北美、东北亚、中东\n\n有可授权的自有品牌	\n是\n\n是否跨境出口专供货源	\n是\n\n上市年份/季节	\n2022年秋季\n全部参数\n讲解视频\n商品评价\n商品属性\n包装信息\n商品详情\n商品评价\n5.0\n \n700+
+912 А2/Б колье|подвеска+серьги | restored: None | w: 4 wsrc: карточка
+   weights: 商品件重尺通过AI数据校验准确\n颜色	重量(g)\nEH12淡水珍珠耳环	4\n商品详情\n【平台活动下价格】\n活动前价格：（1）非分销场景下，指平台活动（不含分销场景的活动）预热期（若无预热期，则为爆发期）前的商品销售价格；（2）分销场景下，专指分销活动预热期（若无预热期，则为爆发期）前的商品销售价格。\n前述价格未计算平台发放的各种采购津贴、跨店券、红包等优惠，未计算商家设置的满减优惠、优惠券、店铺返
+   colors: 颜色	\nEH12淡水珍珠耳环\n\n有可授权的自有品牌	\n否\n\n是否跨境出口专供货源	\n是\n\n上市年份/季节	\n2024年春季\n\n耳针材质	\n不锈钢\n\n风格分类	\n时尚通勤\n\n主要销售地区	\n欧洲、南美、东南亚、北美、东北亚、中东、其他\n\n适用人群	\n女式\n\n流行元素分类	\n形状/图案\n全部参数\n4.3
+965 чокер | restored: None | w: 10 wsrc: карточка
+   weights: 商品件重尺\n颜色	重量(g)\n2mm珍珠项链（尾链款）	10\n3mm珍珠项链（尾链款）	10\n4mm珍珠项链（尾链款）	10\n5mm珍珠项链（尾链款）	10\n6mm珍珠项链（尾链款）	10\n7mm珍珠项链（尾链款）	10\n8mm珍珠项链（尾链款）	10\n10mm珍珠项链（尾链款）	10\n12mm珍珠项链（尾链款）	10\n14mm珍珠项链（尾链款）	10\n3mm（磁铁款）珍珠项链	10\n4mm（磁铁
+   colors: 颜色	\n2mm珍珠项链（尾链款）、3mm珍珠项链（尾链款）、4mm珍珠项链（尾链款）、5mm珍珠项链（尾链款）、6mm珍珠项链（尾链款）、7mm珍珠项链（尾链款）、8mm珍珠项链（尾链款）、10mm珍珠项链（尾链款）、12mm珍珠项链（尾链款）、14mm珍珠项链（尾链款）、3mm（磁铁款）珍珠项链、
+995 колье | restored: None | w: 30 wsrc: карточка
+   weights: 商品件重尺\n重量(g)\n30\n商品详情\n【平台活动下价格】\n活动前价格：（1）非分销场景下，指平台活动（不含分销场景的活动）预热期（若无预热期，则为爆发期）前的商品销售价格；（2）分销场景下，专指分销活动预热期（若无预热期，则为爆发期）前的商品销售价格。\n前述价格未计算平台发放的各种采购津贴、跨店券、红包等优惠，未计算商家设置的满减优惠、优惠券、店铺返利金、店铺会员折扣以及L会员价、商家设置的指定
+   colors: 颜色	\n两戴花朵毛衣链胸针\n\n主要销售地区	\n非洲、欧洲、南美、东南亚、北美、东北亚、中东\n\n有可授权的自有品牌	\n是\n\n是否跨境出口专供货源	\n是\n\n上市年份/季节	\n2023年冬季\n全部参数\n商品评价\n商品属性\n包装信息\n商品详情\n商品评价\n5.0\n \n20+条评价\n好评率 \n100%\n匿名购买
+114 серьги | restored: None | w: 25 wsrc: карточка
+   weights: 商品件重尺\n颜色	长(cm)	宽(cm)	高(cm)	体积(cm³)	重量(g)\n金色 4223	9	14	2	252	25\n白K 4223	9	14	2	252	25\n商品详情\n【平台活动下价格】\n活动前价格：（1）非分销场景下，指平台活动（不含分销场景的活动）预热期（若无预热期，则为爆发期）前的商品销售价格；（2）分销场景下，专指分销活动预热期（若无预热期，则为爆发期）前的商品销售价格。\n前述
+   colors: 颜色	\n金色 4223、白K 4223\n\n有可授权的自有品牌	\n否\n\n是否跨境出口专供货源	\n是\n\n上市年份/季节	\n2026年夏季\n\n风格分类	\n个性风潮\n\n主要销售地区	\n非洲、欧洲、南美、东南亚、北美、东北亚、中东\n\n适用人群	\n女式\n\n商品类型	\n饰品\n\n流行元素分类	\n形状/图案\n全部参数
+Very interesting findings:
+
+  1. №114 qty says 50 but plan 10 + comp 40 = 50 ✓. But the brief says "№114 — 10 шт поштучно + 40 в наборы" ✓.
+
+  2. №6 (чокер): NO det at all (weights empty, colors empty). Brief said 16 positions were refetched (№32–40, 42, 44–49). №6 isn't among them. №6 has no card → w=30 assumption.
+
+  3. №37 (Г крест): colors list "金色、银色" → ncol=2 → 0 points for variants. Previously Codex review said №6 and №37 got +5 because no variants recognized → now 0. Let me check their current комплектность score. Colors = 金色、银色 → 2 variants → 0 points. Wait but has 长(cm) table — that gives sz. №37 currently: качество? Let me check its R.
+
+  4. №189 (браслет): colors "金色单只 2022、白K单只 2022" — "单只" means "single piece"! Colors list = 2 variants → комплектность 0. But wait — "单只" = single earring... for a bracelet? These are probably color variants sold individually. Hmm, 2 variants → 0 points. Also note: weights table has no 长×宽, just 重量(g) 60. Colors: is there a size? No 尺寸. The old review issue was reviews matching 尺寸. Now col has no 尺寸 anyway.
+
+  5. №912: "А2/Б колье|подвеска+серьги" — weights table: 颜色/重量(g) header then "EH12淡水珍珠耳环 4" — 1 SKU row. colors: "EH12淡水珍珠耳环" → ncol=1 → nvar = max(1, 库存 count). 库存 appears? weights shows no 库存 lines → nsku=None → nvar=1 → +5 "один вариант". OK.
+
+  6. №965 (чокер): colors list has ~11+ variants (2mm...14mm, plus 磁铁款) → ncol≈13 → 0 points variants. Size: чокер in NECKSEG. col contains "2mm珍珠项链（尾链款）" — the regex `(链长|长度|周长)\t?\n?[^\n\d]{0,6}\d` — does it match? "尾链款" contains 链 but not 链长. No 周长/链长 in col. ≥30cm check: any \d+\s*(cm|CM|厘米) ≥30? Not in the snippet. So sz for №965? col also might contain 尺寸 somewhere... Actually the important thing: 965 previously got +5 for size via "2mm珍珠" — wait no, old rule was 珍珠项链 name matching? Old review: "№965 — 2mm珍珠项链, диаметр жемчужин вместо длины колье". New rule for NECKSEG: only 链长/长度/周长 with digit, or ≥30 cm. "2mm珍珠项链" has mm — not matching the NECKSEG branch (NECKSEG branch doesn't have the mm regex!). Let me re-read:
+
+  ```
+  if it["seg"] in NECKSEG:
+      sz = sz or bool(re.search(r"(链长|长度|周长)\t?\n?[^\n\d]{0,6}\d", col + t)) or any(int(v) >= 30 for v in re.findall(r"(\d+)\s*(?:cm|CM|厘米)", col + t))
+  ```
+
+  So for necklaces, mm matches no longer count — good, №965 fixed. But wait — `sz` base (line 117): `re.search(r"长\(cm\)\t宽\(cm\)[^\n]*\n[^\n]*\t\d", wt)` or `尺寸\t?\n[^\n]*\d` in col. For №965: does col contain 尺寸 with digit? The colors text shows no 尺寸 param. weights table: 颜色/重量(g) header, no 长宽. So sz=False? Then weight+size +5 not given — правильно? For a pearl necklace, 2mm...14mm refers to bead diameter — legitimately not garment size. OK.
+
+  But hold on — base `sz` check `尺寸\t?\n[^\n]*\d` on col: `尺寸` followed by optional tab, newline, then digits anywhere on next line. In many cards, 尺寸 might be a parameter like "尺寸\n12cm" — fine. But danger: "尺寸" could appear in "建议尺寸" or in review text... reviews are cut. OK.
+
+  7. №364 (брошь): colors "毛衣链金色、毛衣链银色、胸针金色、胸针银色" — 4 variants! The card sells both 毛衣链 (sweater chain/necklace) AND 胸针 (brooch) variants. ncol=4 → комплектность 0 ✓. And size: брошь not in NECKSEG → 周长/链长 lines removed from col. Does col contain 周长? Not in the snippet shown. weights: only 重量(g) 30. So sz likely False → no +5. Previously got +5 via 周长 81cm. Fixed? Need to verify computed R for 364.
+
+  Also, the refetched16 — let me check №32-49 now have det. №6 doesn't have det. Was №6 supposed to? The brief says 16 positions №32–40, 42, 44–49. Let me verify all 16 now have det with real data.
+
+  8. Review-cut regex: `商品评价\n[\d.]+.*?查看全部评价` with re.S. №364 colors: "商品评价\n商品属性\n包装信息\n商品详情\n商品评价\n5.0\n \n700+" — interesting! Structure: "...全部参数\n讲解视频\n商品评价\n商品属性\n包装信息\n商品详情\n商品评价\n5.0\n \n700+...". The regex needs `商品评价\n[\d.]+` — 商品评价 followed by newline and rating. Here first 商品评价 is followed by 商品属性 (not rating), then later 商品评价\n5.0 — matches (rating 5.0). Then `.*?查看全部评价` with re.S — does "查看全部评价" appear after? In №364 the text continues "...好评率..." maybe includes 查看全部评价. If the review block exists, it's cut. But what if a card has 商品评价\n5.0 but no 查看全部评价 (e.g., "暂无评价")? Then regex doesn't match and review text stays in col — could spuriously match 尺寸 in review text. Edge case.
+
+  Also danger: `[\d.]+` — a 商品评价 section might start with "商品评价\n图片" or something. Or the rating could be "5.0\n \n700+条评价". Fine.
+
+  But more important false-positive risk: review text WITHOUT the leading 商品评价\n<rating> pattern. E.g., review snippets embedded elsewhere. Let me scan all cards for 尺寸 occurrences in col AFTER cut, and check whether they're real params or leftover reviews.
+
+  9. The 库存 SKU counting: I haven't seen any 库存 lines in the examples! №114 weights: "商品件重尺\n颜色\t长(cm)\t宽(cm)\t...重量(g)\n金色 4223\t9\t14\t2\t252\t25\n白K 4223\t9..." — no 库存. So nsku is None for these cards. When does 库存 appear? Maybe in cards with SKU stock table further down the page. Let me scan all items: how many have 库存\d in weights, and validate the count vs colors count.
+
+  Also: `nsku = len(re.findall(r"\n库存\d", d.get("weights") or ""))` — but weights includes the 商品详情 tail (huge promo text). The tail might contain 库存\d spuriously? E.g. "库存" in some explanation text followed by digit. Let me check.
+
+  Also ncol parsing: `mc = re.search(r"颜色\t?\n([^\n]+)", col)` — matches "颜色\t\n金色、银色". But note: weights table header also has "颜色\t重量(g)" — that's in weights, not col. In col, "颜色" param appears as "颜色\t\n..." Good. But danger: "颜色" might appear inside other text, e.g., "无颜色" or "颜色\n金色 4223" fine. What about col containing multiple 颜色 entries (e.g., 主要颜色)? re.search takes first. Also "颜色\t?\n([^\n]+)" requires 颜色 then optional tab then newline — what about "颜色：金色、银色" on same line? Then no match → ncol=None → may fall to nsku or rows. Hmm.
+
+  Wait, actually there's a subtle bug risk: the regex `颜色\t?\n([^\n]+)` — if colors value is on the SAME line separated by tab: "颜色\t金色、银色\n" — that is "颜色" TAB "金色、银色" NEWLINE. Then `颜色\t?\n` requires newline right after optional tab — but here after tab comes 金色, not newline. No match! But in examples the format is "颜色\t\n金色、银色" — 颜色, tab, newline, value. Let me verify with №37: colors shows "颜色\t\n金色、银色\n\n..." — yes "颜色\t\n". OK so format is key\n value on next line.
+
+  Now the number parsing: `len([v for v in re.split(r"[、,，]", mc.group(1)) if v.strip()])`. For №189 "金色单只 2022、白K单只 2022" → 2. OK.
+
+  Danger: colors line could be very long with many variants — fine.
+
+  Another subtlety: `nvar = max(...)` of ncol and nsku. When ncol=1 (single color listed) but the weights table has 2 SKU rows (e.g., sizes), nsku... no 库存 rows typically. rows fallback not used since ncol present. So card with 1 color × 3 sizes → ncol=1 → +5 "один вариант". Is that a false positive? The METHOD: "5 — один вариант в карточке" — arguably means one SKU. A card with 1 color but 3 sizes has 3 SKUs → seller must choose size. False positive possible. How to detect: rows count in weights table = SKU rows. For №114: rows=2 (金色 4223, 白K 4223) but colors also 2 → consistent. Let me scan for cards where weights table rows > ncol — those are multi-size single-color cards misscored as "один вариант".
+
+  Also `rows` fallback: `rows = [l for l in weights.split("商品详情")[0].split("\n")[2:] if "\t" in l and l.strip()]` — skips first 2 lines (商品件重尺 header + table header). For №114: lines: "商品件重尺", "颜色\t长(cm)...\t重量(g)", "金色 4223\t9...", "白K 4223\t9..." → rows=2 ✓.
+
+  For №912: "商品件重尺通过AI数据校验准确", "颜色\t重量(g)", "EH12淡水珍珠耳环\t4" → rows=1 ✓.
+
+  For №37: "商品件重尺", "长(cm)\t宽(cm)\t高(cm)\t体积(cm³)\t重量(g)\t箱规", "2\t2\t2\t8\t12\t" → rows=1 (the line "2\t2\t2\t8\t12\t" has \t and strip → non-empty). ncol=2 → max=2. OK.
+
+  Now, one more thing on rule 4: "если нет ни того ни другого и нет строк таблицы — «не распознаны»". Code: `nvar = max(...) if (ncol or nsku) else (len(rows) if rows else None)`. Note: `ncol or nsku` — if ncol=0? Can't be 0 (None or ≥1). If colors list exists but parses to 0 non-empty values? `re.split` of empty string gives [''] → filtered → 0 values... wait if mc matches but group is empty — `颜色\t?\n([^\n]+)` requires at least one char. If group is " " (space) → split gives [' '] → v.strip() empty → ncol=0! Then `ncol or nsku` → 0 is falsy → falls to nsku/rows. ncol=0 edge handled by falsiness. But `max(v for v in (ncol, nsku) if v)` — if ncol=0 and nsku=None → generator empty → ValueError! Wait: `if (ncol or nsku)` — ncol=0, nsku=None → condition False → rows branch. OK safe. But ncol=0 with nsku=3 → max(3)=3 fine.
+
+  Hmm wait, actually another subtle bug: `ncol or nsku` truthiness with ncol=0 → goes to `len(rows) if rows else None`. OK.
+
+  Now the nsku counting: `\n库存\d` — the weights text: does the 商品详情 tail contain "库存" followed by digit? The tail is pricing disclaimer text. Possible: "库存" might appear in promo rules? Let me scan for cards where nsku is not None and compare against colors.
+
+  Also `nsku` counts lines "\n库存0" too (zero stock). Fine-ish.
+
+  Important: nsku is counted over the WHOLE weights including tail after 商品详情 — inconsistent with rows which cut at 商品详情. If tail contains 库存\d spuriously, nsku inflates → false "N вариантов" → 0 points. Let me scan.
+
+  Now let me check extender logic:
+  ```
+  ex = re.search(r"延长链?\t?\n?([^\n]*)", col + "\n" + t)
+  ext = bool(ex and not re.match(r"\s*(无|没有|否|0\b)", ex.group(1))) or has(r"尾链", col + t)
+  ```
+  `延长链?` matches 延长 or 延长链. Then optional tab, optional newline, then captures rest of line. Problem: `([^\n]*)` can be EMPTY — if 延长 is immediately followed by newline. Then ex.group(1)="" → not matching 无/没有/否/0 → ext=True! "延长\n无" — wait: pattern `延长链?\t?\n?([^\n]*)` on "延长\n无": 延长 matched, then \t? optional (none), \n? consumes \n, then ([^\n]*) captures "无" → group="无" → re.match 无 → not ext. OK. But on "延长\n" (nothing after) → group="" → ext=True by vacuous truth. Is "延长:" with empty value real? Rare.
+
+  Bigger problem: `延长` without 链 in col could be part of "延长链" already handled, or words like "可延长" (can extend), or "延长款" (extended version). If a necklace has param "延长\n5cm" → group="5cm" → ext=True ✓.
+
+  But what about "延长链：无" in format "延长链\n无"? Same as above ✓. What about "延长链：无" same line with colon? "延长链：无" — pattern: 延长链 matches, \t? none, \n? none, ([^\n]*) captures "：无" → group="：无" → re.match(r"\s*(无|没有|否|0\b)") fails because of fullwidth colon "："! → ext=True — FALSE POSITIVE! "延长链：无" (with fullwidth colon on same line) would be treated as HAS extender. Need to check if any card has 延长链：无 format. The claim in fix is "по значению поля: 延长链: 无/没有/否/0 = нет". Let me scan actual values of 延长链 fields.
+
+  Also `0\b` — matches "0" not followed by word char. "01cm"? group "01cm" → re.match 0\b fails (0 followed by 1 = word char → \b fails) → ext=True. Hmm.
+
+  Also the 尾链 has() check: any occurrence of 尾链 anywhere in col+t → ext=True. №965: "尾链款" everywhere — it's a variant name (尾链款 = "with tail-chain option"). If card has BOTH 尾链款 and 磁铁款 variants... 尾链 presence → ext=True. For №965 that seems right (most variants have tail chain). OK.
+
+  But danger: `has(r"尾链", col + t)` — title might contain 尾链 in unrelated context. Rare.
+
+  Now for the brooch norm (≤25 g): check distribution of brooch weights and what got 0/5. Also "браслет и кольца набор" adj regex. Also note: `it["seg"] in ("браслет", "кольца набор")` — what about segment "кольца" (single rings)? A single ring size — adjustable rings (开口/活口) would be the norm; non-adjustable need size. The else branch gives 0 "норматив посадки для сегмента не задан" — so single rings get 0 always? Let me check segments present. And брошь ≤25g: w from card. If w missing (wsrc≠карточка) → 0.
+
+  Also серьги norm: вес пары ≤20 г. OK.
+
+  Now, additional issue in block 5 first line: 
+  ```
+  q.append((5, "вес и размеры есть в карточке 1688") if (wk and sz) else (0, "ожидает проверки: карточка восстановлена из черновика, размеры не сохранились" if restored else (...)))
+  ```
+  Note `restored` message shown even if sz present but restored? If restored and sz True but wk... wk = wsrc=="карточка". For restored cards, is wsrc "карточка"? METHOD says restored cards lack sizes and alloy. Whatever.
+
+  Now block 6: `if it["order"] == "1000-ч2" and it["src"] == "сборный"` — checked pairs. Note k1 for those: +5 if pv startswith ок. Fine.
+
+  Now, major checks to run:
+  A. 16 refetched positions: verify det present and fields look real.
+  B. Review-cut: scan for 尺寸/周长/链长/延长 in remaining col that come from review regions (商品评价...查看全部评价 variations without rating). Also count how many cards have 商品评价 block and whether regex catches all: scan for cards where col still contains 查看全部评价 or 条评价.
+  C. 库存 counting: distribution, cross-check vs colors, spurious matches in 商品详情 tail.
+  D. ncol parsing edge cases: colors on same line; multiple 颜色 keys; colors value with digits only.
+  E. nvar mismatch: ncol=1 but rows>1 (multi-size) — count false "один вариант".
+  F. extender field values scan: collect 延长链 values across all cards; find "：无" false positives; find "延长" occurrences context.
+  G. Brooch/bracelet/ring norms: list scores.
+  H. sz logic for non-neck: `re.sub(r"(周长|链长)\t?\n[^\n]*", "", col)` — removes ONLY "周长\n<value>" (with newline) forms; if format is "周长\t\n81cm" — `周长` then \t? then \n then [^\n]* → matches "周长\t\n81cm" ✓. If "周长：81cm" same line — NOT removed → contains digit → sz=True via the mm/cm regex → FALSE POSITIVE for brooch. Check №364-type cases: scan non-neck items with 周长 same-line.
+
+  Also non-neck sz regex: `(长度|直径)\t?\n?[^\n\d]{0,6}\d` — 长度 with digit within 6 chars. "长度\n12cm" ✓. But also `\d+\s*(cm|CM|厘米|mm)` ANYWHERE in col+t+wt(after sub) — for earrings "9\t14\t2\t252\t25" mm? The wt table values are bare numbers with tabs — "9\t14" no mm suffix. But col may contain e.g. "针粗0.7mm" (pin thickness) — matches \d+mm → sz=True. Pin thickness/gauge is not garment size... but for earrings, is any mm measurement OK? The rule was meant to fix "диаметр бусины не размер" for necklaces; for other segments any mm counts. Earrings "珍珠8mm" — bead size again — false positive for earrings! A pearl stud's size IS the pearl diameter though — arguably that IS the size. OK debatable.
+
+  I. Neck sz regex detail: `(链长|长度|周长)\t?\n?[^\n\d]{0,6}\d` — searches col+t. Danger: t (title) may contain "加长版80cm毛衣链" — 长度? No. 周长 in title? For necklaces, any 周长 with digit is fine (necklace circumference). But "链长" in title like "链长40cm" ✓ legit.
+
+  The ≥30 cm rule: `any(int(v) >= 30 for v in re.findall(r"(\d+)\s*(?:cm|CM|厘米)", col + t))` — any cm number ≥30 → sz. But what about "全长45cm" where the item is a bracelet chain? For NECKSEG it's fine.
+
+  BUT: danger — for necklaces this also matches "包装\n35cm*25cm" (packaging size) or "模特身高170cm"! 170 ≥ 30 → sz=True false positive. Or "外箱：10*10*10cm" no. Model height in description... col is params only. Params like "包装尺寸\n30cm" possible. Let me scan for cm values in neck cards with context.
+
+  J. qty plan: check `q = min(50, r["qty"])` — r["qty"] is from orders plan (order quantities). OK.
+
+  K. consensus_canon.py: `y["наборы 15×10"] = sum(10 * c["cny"] for c in sets)` — cny from final_sets (neck cny + ear cny) ✓ no double count because qty adds units. But wait — actually there IS a potential accounting subtlety: for the ИТОГО ¥, the per-item lines use cny of items. The sets line uses neck cny + ear cny. If a necklace is in plan "оплатить 50" (50×cny counted) and in 1 set ×10 (10×(neck+ear) counted), total paid = 60×neck + 10×ear. Matches qty JSON (60 neck, 10 ear). Consistent. ✓ No double count.
+
+  BUT — check `min(25, r["qty"])` for HALF70 and `min(50...)`: if r["qty"] < q... fine.
+
+  One more: `y[a] += r["cny"] * q` — for "тест следующей очередью" q=0, fine; "весна" q=0; "отложить" q=0.
+
+  L. Sets selection: `sorted(..., key=lambda c: c["need_canon"])[:15]` — 15 cheapest PASSING sets. But all 56 pass now. Fine. But hmm — sets_canon used W(a)+W(b) with W default 30 for missing w. And earring HIT weights... fine.
+
+  Potential issue in sets_canon: market pool `sets` filtered orders30>=30, `ok = [x for x in sets if x["price"] >= thr]` — same as before. med computed over sets prices. headroom = med/thr. OK.
+
+  But: sets_canon inv includes ONE 22 ₽ ФФ. If necklace and earrings are from DIFFERENT 1688 sellers, two orders → 44 ₽. Minor.
+
+  Also sets_canon uses `CF["k"]` — k=2.1764705882352944 = 1+1/0.85. ✓ consistent with price_check_canon line 18.
+
+  M. price_check_canon.py — check the thr/need uses DRR from env default 0.10 ✓; SPP=0.35. `ok_rows >=5 and fr>=1`. The brief says решения оплатить 459... matches Counter. ✓
+
+  N. Check quality=137 zeros reason distribution; check комплектность 1065 zeros: how many are "не распознаны" vs "N вариантов".
+
+  O. Also examine the `decision` field (old v2) vs decisionCANON — the summary "Решения" uses decisionCANON. ✓
+
+  P. Q5: other issues:
+  - score.py line 101: `if it["seg"] == "браслет" or has(...) and it["seg"] not in NECKSEG` — operator precedence: `or` of (seg==браслет) and (has and not in NECKSEG). OK.
+  - econ() in score.py: essentially unused for decisions now? decisions use price_check_canon. But score.py still writes decision field and "экономика" — econ passes only 3. That's the OLD honest-median filter — mostly dead but printed. Not an error per se.
+  - clip THR uses pct over clip keys — fine.
+
+  Also potential issue: `SEGP` median uses price ≤1600 filter but comps() in score block 1 doesn't filter ≤1600 — pre-existing.
+
+  Q. Check the "70–74 балла" rule: HALF70 applies a="оплатить 25 (70–74 балла)" when a=="оплатить 50" and total<75. Positions with total exactly 75+ stay 50. Fine. But note: this halves qty for 70-74 → the brief says рекомендованный вариант 70–74 по 25 шт ✓.
+
+  But hmm — in HALF70 mode, y for "оплатить 25" = cny*25. And "ровно 70 баллов" stats printed. OK.
+
+  R. Potential double-count in sets selection for ИТОГО: `cards = sum(q > 0 for a, q in plan.values())` — counts sets too. "новых карточек 996" matches brief ✓.
+
+  Now let me also verify the claim "Цепочка прогнана на копии и в рабочей папке, scored.json совпали" — scored_ref.json equals scored_before_round3.json? Both 17868984 bytes. scored.json is 17871176 — different size, so scored.json ≠ scored_ref.json. Let me check what differs. scored_before_round3.json = 17868984 = scored_ref.json size. Hmm "scored_ref" might be the copy-folder reference. Diff: scored.json has 2192 more bytes. Probably decisionCANON/whyCANON added. Let me diff quickly.
+
+  Let me run these checks now.
+
+• Теперь проверяю правила 1–5 на данных: вырезание отзывов, размеры, удлинитель, SKU, нормы посадки.== A. refetch16 ==
+32 А2/Б колье|подвеска+серьги det: True w: 11 карточка restored: None
+33 А3 набор 3 det: True w: 36 карточка restored: None
+34 А4 набор 4+ det: True w: 25 карточка restored: None
+35 Г крест det: True w: 18 карточка restored: None
+36 А4 набор 4+ det: True w: 26 карточка restored: None
+37 Г крест det: True w: 12 карточка restored: None
+38 А2/Б колье|подвеска+серьги det: True w: 20 карточка restored: None
+39 А2/Б колье|подвеска+серьги det: True w: 18 карточка restored: None
+40 А3 набор 3 det: True w: 17 карточка restored: None
+42 Г крест det: True w: 5 карточка restored: None
+44 А4 набор 4+ det: True w: 23 карточка restored: None
+45 А2/Б колье|подвеска+серьги det: True w: 25 карточка restored: None
+46 Г крест det: True w: 3 карточка restored: None
+47 А3 набор 3 det: True w: 19 карточка restored: None
+48 А3 набор 3 det: True w: 11 карточка restored: None
+49 А3 набор 3 det: True w: 28 карточка restored: None
+== B. leftovers ==
+карточек с 商品评价: 950 | остаток 查看全部评价/条评价: 61 | размерные слова в отзывах-остатке: []
+== C. 库存 ==
+карточек с 库存\d: 1323 | ncol!=nsku: [(21, 9, 7), (34, 10, 7), (40, 8, 3), (44, 8, 1), (51, 6, 4), (62, 2, 1), (77, 9, 3), (79, 6, 3), (100, 6, 5), (113, 8, 4), (126, 7, 3), (159, 8, 2), (175, 2, 1), (231, 6, 4), (235, 6, 5), (239, 7, 2), (254, 10, 8), (324, 6, 3), (325, 4, 2), (328, 9, 1)]
+库存 контекст: {}
+
+
+• Findings:
+
+  A. All 16 refetched positions have det now ✓.
+
+  B. 950 cards have 商品评价 block; 61 still have 查看全部评价/条评价 left in col after cut. Need to check whether those 61 have a different review format (e.g. 商品评价\n图片 or no rating) and whether they contain 尺寸 etc. that pollute. Also no review-size leftovers found by my quick regex.
+
+  Wait, ctx Counter printed {} — that's wrong, my context detection code was buggy: `w.index(m.group(0))` — but I iterated `re.finditer(r".{12}库存\d", w)` and the ctx was empty meaning... no wait, cnt=1323 cards have \n库存\d, but the ctx counter found ZERO matches with 12 chars before?? Because `.{12}` requires exactly 12 chars before 库存 — with default flags `.` doesn't match \n, so if 库存 is at line start (<12 chars on the line after \n), no match. Let me redo: use `[^\n]{0,12}` before. Also distinguish head vs tail.
+
+  Let me redo the context check and examine the 61 leftovers, plus specific examples of mismatch ncol vs nsku (21, 34, 40, 44...). Also check where 库存 lines appear — head or tail — and validate true SKU counts.
+
+  Interesting mismatch examples: №34 ncol=10 nsku=7; №44 ncol=8 nsku=1; №40 ncol=8 nsku=3. Which is right? Let me look at actual weights for a few.
+
+• Уточняю контекст `库存` и разбираю 61 остаток отзывов + несовпадения ncol/nsku.зоны 库存: {'TAIL': 3590, 'HEAD': 4}
+примеры из хвоста: [(1, '库存7892对'), (1, '库存8607对'), (1, '库存8266对'), (1, '库存8634对'), (1, '库存8717对'), (3, '库存97203条'), (5, '库存772PCS'), (5, '库存2175PCS')]
+№ 30 ctx: '元素\n对比\n1项\n官方验货\n商品评价\n官方验货报告\n商品属性\n包装信息\n商品详情\n同款推荐\n商品评价\n5.0\n\xa0\n40+条评价\n好评率\xa0\n100%\n匿名购买\n30件'
+№ 131 ctx: '组合\n常规链\n链子样式\n椭圆\n流行元素\n对比\n商品评价\n商品属性\n包装信息\n商品详情\n同款推荐\n商品评价\n5.0\n\xa0\n1条评价\n好评率\xa0\n100%\n'
+№ 157 ctx: '形\n流行元素\nchic风\n风格\n对比\n商品评价\n商品属性\n包装信息\n商品详情\n同款推荐\n商品评价\n5.0\n\xa0\n1700+条评价\n好评率\xa0\n1'
+№ 239 ctx: '\nins风\n风格\n圆形,几何\n流行元素\n对比\n商品评价\n商品属性\n包装信息\n商品详情\n同款推荐\n商品评价\n5.0\n\xa0\n2条评价\n好评率\xa0\n100%\n匿名购买\n30套\n近90天超10'
+№ 246 ctx: '组合\n常规链\n链子样式\n线条\n流行元素\n对比\n商品评价\n商品属性\n包装信息\n商品详情\n同款推荐\n商品评价\n5.0\n\xa0\n1条评价\n好'
+№ 279 ctx: '式\n水钻\n坠子材质\n环形\n流行元素\n对比\n商品评价\n商品属性\n包装信息\n商品详情\n同款推荐\n商品评价\n5.0\n\xa0\n40+条评价\n好评率\xa0\n100%\ne**n\n1件\n燈光下太好看，完'
+всего 61
+остатки с 尺寸+цифра: [1481]
+№ 21 серьги ncol 9 nsku 7
+   颜色: 02 金色 3953、02 白K 3953、03 金色 3954、03 白K 3954、04 金色 3957、04 白K 3957、05 金色 3958、05 白K 3958、06
+   库存 lines: ['库存2590对', '库存2896对', '库存2703对', '库存2959对', '库存2873对', '库存2924对', '库存2941对']
+№ 34 А4 набор 4+ ncol 10 nsku 7
+   颜色: 金色四件套、银色四件套、金色手链、银色手链、金色项链、银色项链、金色耳钉、银色耳钉、金色戒指、银色戒指
+   库存 lines: ['库存9457PCS', '库存8668PCS', '库存9982PCS', '库存9971PCS', '库存9970PCS', '库存9909PCS', '库存9966PCS']
+№ 40 А3 набор 3 ncol 8 nsku 3
+   颜色: 01 kc金 1238（耳钉）、02 kc金 0345（戒指）、03 kc金 1629（项链）、04 白K 1873（耳钉）、05 白K 3571（戒指）、06 白K 3091（项
+   库存 lines: ['库存2437PCS', '库存2449PCS', '库存2443P']
+№ 44 А4 набор 4+ ncol 8 nsku 1
+   颜色: 13mm黑色、13mm白色、13mm绿色、13mm红色、13mm粉红色、13mm深红色、13mm蓝色、13mm金色
+   库存 lines: ['库存999976P']
+№ 77 Г крест ncol 9 nsku 3
+   颜色: 01 金色 6678、01 白k 6678、02 金色 6982、02 白k 6982、04 金色 6831、05 金色 7258、05 白k 7258、06 金色 7405、06
+   库存 lines: ['库存942件', '库存3116件', '库存2']
+№ 175 браслет ncol 2 nsku 1
+   颜色: 5609302HB、5610402
+   库存 lines: ['库存867191PCS']
+
+
+• Key findings:
+
+  1. **库存 counting is fundamentally broken as SKU count**: the `库存<число>` lines live in the TAIL (商品详情 region — the scraped page's SKU stock list), 3590 matches in TAIL vs 4 in HEAD. And the count often does NOT match the actual number of variants:
+     - №21: colors list = 9 variants, 库存 lines = 7 (some SKUs share stock lines or out-of-stock SKUs omitted).
+     - №34: colors = 10, 库存 = 7.
+     - №40: colors = 8, 库存 = 3.
+     - №44: colors = 8, 库存 = 1 (only one 库存999976P line — probably the stock table shows only first few).
+     - №175: colors = 2, 库存 = 1.
+     
+     So `nsku` UNDERCOUNTS systematically (the stock list on the page is paginated/truncated). Since nvar = max(ncol, nsku), undercounting only matters when ncol is missing but nsku present → nvar=nsku < real → could give "1 вариант" when colors missing but stock lines =1 while real variants ≥2. №175: ncol=2 anyway. But when colors list is absent entirely and nsku=1 → "один вариант" +5 possibly wrong. Also when ncol absent and nsku=3 vs real 8 → nvar=3 → still 0 points (multi-variant) — no score impact, only reason text.
+
+     Conversely: does nsku ever OVERCOUNT vs real variants? The tail stock list shows ALL SKUs incl. out-of-stock — 库存0 counted too. That's fine-ish for "variants exist".
+
+     More important: since max(ncol, nsku), and nsku ≤ real variants in observed cases, the practical effect: few false "один вариант". Let me quantify: cards where nvar==1 (+5 points) — how many rely solely on nsku (ncol None) or ncol==1 with rows>1 in weights table?
+
+  2. **The 61 leftover review blocks**: pattern `商品评价\n<rating>…查看全部评价` fails when between 商品评价 and rating there are other lines like "官方验货报告"? No wait — the leftovers show "商品评价\n5.0\n \n40+条评价\n好评率 100%\n匿名购买\n30件" — where's 查看全部评价? The cut regex requires `查看全部评价` AFTER the rating. These 61 cards apparently don't have 查看全部评价 in colors at all (short review summary "1条评价" etc.). So review SUMMARY text (评分, 条评价, 好评率, 匿名购买, N件, review snippets like "燈光下太好看...") stays in col. Does it affect scoring? Review snippets could contain 尺寸 — found 1: №1481 has 尺寸+цифра in leftover. Check what №1481 got.
+
+     Also "燈光下太好看，完..." snippets — could contain 链长/周长/延长 words → affect extender check (rule 3!) and size check. Let me scan leftovers for 尾链/延长/可调/开口 etc.
+
+  3. №44's colors show "13mm黑色..." — 8 variants fine.
+
+  Also note mismatch direction: nsku undercounts. Let me count cards where nvar was decided by nsku alone (ncol None) and nvar==1 → possible false +5. And cards ncol=1 but weights-table rows>1 → multi-SKU single color misjudged as single variant.
+
+  Also scan: 库存 lines with 库存0 (zero stock) — counted as SKU. Fine.
+
+  Next checks:
+  - D. extender values: collect all 延长链 field values; find false positives (：无 fullwidth colon).
+  - E. neck cm≥30 false positives: packaging/model params.
+  - F. non-neck 周长 same-line.
+  - G. brooch/bracelet/ring norms: scores + weights distribution.
+  - H. ncol=1 & rows>1.
+  - I. nvar==1 stats: how many +5 given, how many rely on nsku only.
+  - J. №1481 details.
+
+• Нашёл систематику: `库存` считается по хвосту страницы и занижает SKU. Копаю дальше: удлинитель, размеры, нормы посадки.'无' 5
+'10cm以下' 5
+'流行元素' 4
+'' 1
+'使用寿命，电镀工艺防褪色保持长久如新，复' 1
+'，可以自由调节佩戴周长，适配不同颈围，可' 1
+'长度可调，穿戴便捷' 1
+'6cm' 1
+'。长短松紧可以自行调整。胖瘦均可佩戴。' 1
+'链子样式' 1
+'批发仿绿碧玺首饰套装祖母绿戴王妃饰品三件' 1
+'、（铜镀白金色）一对价/配耳堵、（铜镀白' 1
+значения с 无/没有: []
+колье: cm>=30 в подозрительном контексте: 0
+не-колье: 周长/链长 остались после саба: 0
+
+
+• Let me set up a todo list to track this multi-part review, then continue checks.
+
+  Extender field values: 
+  - '无' 5 cards — handled correctly (无 matched).
+  - '10cm以下' 5 — has value → ext ✓.
+  - '流行元素' 4! — the regex `延长链?\t?\n?([^\n]*)` matched "延长" inside some longer word followed by 流行元素? E.g., col has "...延长\n流行元素..." Hmm wait — where does 延长 appear right before 流行元素? Maybe in params sequence "...延长\n流行元素\n..." — a param KEY "延长" with empty value then next key 流行元素? Pattern: `延长链?` then `\t?` `\n?` then captures `([^\n]*)` — if text is "自由延长\n流行元素", captures... wait \n? consumes the newline, then captures "流行元素"? No wait — if 延长 is immediately followed by \n流行元素, then `\t?` matches empty, `\n?` consumes \n, `([^\n]*)` captures "流行元素". So group="流行元素" → doesn't match 无 → ext=True. For 4 cards the "延长" was probably a dangling word at line end (like "发货时间延长" or param name with value on... hmm). False positives: "流行元素" as value → +5 extender. Which cards?
+  - '' 1 — empty value → vacuous True (+5). Which?
+  - '使用寿命，电镀工艺防褪色保持长久如新，复' 1 — 延长 inside prose (保持长久 → "长久" no; probably "延长使用寿命" in description) → False positive.
+  - '，可以自由调节佩戴周长，适配不同颈围，可' 1 — this is probably a value like "延长链：可调节，可以自由调节..." → legit-ish.
+  - '长度可调，穿戴便捷' — legit value.
+  - '6cm' ✓.
+  - '。长短松紧可以自行调整。胖瘦均可佩戴。' — legit-ish (adjustable).
+  - '链子样式' — same dangling problem as 流行元素.
+  - '批发仿绿碧玺首饰套装祖母绿戴王妃饰品三件' — from TITLE (t fallback) — "延长" matched inside title prose? Title "...三件...延长..." → false positive.
+  - '、（铜镀白金色）一对价/配耳堵、（铜镀白金色）' — from title — false positive.
+
+  So extender rule: several false positives from dangling 延长 followed by next param key, or 延长 inside prose/title. Count affected cards: which of these got +5 on extender? Need to intersect with seg in NECKSEG and see score. Let me identify positions.
+
+  Also note ex.search finds FIRST occurrence in col+"\n"+t. If col has no 延长 but title has — title prose matches. OK.
+
+  Also '无' 5 cards correct. But wait — previous review said №995, 1163, 1172, 1184 have 延长链=无. Now vals['无']=5. Those would get ext=False ✓ fixed. But which 5? Let me confirm they're in the current data and got 0.
+
+  Empty '' 1 card → vacuous True → false +5. Find it.
+
+  Now also check: extender rule applies to NECKSEG only. 尾链 in col+t for those.
+
+  Next: G (norms), H (ncol=1 rows>1), I (nvar==1 sources), J (№1481). Then check `sz` base regex `尺寸\t?\n[^\n]*\d` false positives on non-size params like "建议尺寸\n均码"? 均码 no digit. "误差尺寸\n1-3cm"? that's size-ish. Let me also check sz for earrings via mm (pin thickness) — count earrings with sz from 材质 or pin mm only. Hmm, and the fact `材质` in col for мат.
+
+  Also — check the HALF70 print/behavior in cap3_half70 json: verify "оплатить 25" entries have total in 70..74 and qty 25 (or min with r["qty"]).
+
+  Let me also verify №6 and №37 decisions now.  File "<stdin>", line 15
+    print('№',i+1,r['seg'],'| val:',repr(ex.group(1)[:30)),'| кач-удлин:',r['R']['качество'][1].split('; ')[1][:60])
+                                                        ^
+SyntaxError: closing parenthesis ')' does not match opening parenthesis '['
+источники +5 «один вариант»: {'ncol1': 360, 'nsku_only': 4, 'rows': 0, 'sbor': 0}
+ncol&nsku отсутствуют, +5 по строкам таблицы: []
+ncol=1, но SKU-строк >1: 2
+(88, 'серьги', 17, '品牌\t')
+(135, 'серьги', 16, '品牌\t')
+Fix syntax error and rerun extender check. Also look at №88/135 — rows[0] = '品牌\t' — those are header junk rows (品牌 = brand). The rows heuristic counts lines with \t — but these tables start with 品牌 header. ncol=1 there anyway so no score error.
+
+  nsku_only=4 cards got +5 based solely on 库存 count =1 — check those 4.N 15 А2/Б колье|подвеска+серьги | val: '流行元素' | балл кач: 10
+    ctx: 装组合|耳饰+项饰|链子样式|延长链|流行元素|圆形|品牌	|无|
+N 94 А2/Б колье|подвеска+серьги | val: '' | балл кач: 10
+    ctx: 佩戴1-3个月||调节功能	|延长链||风格	|简约||形状	|不
+N 1031 А2/Б колье|подвеска+серьги | val: '流行元素' | балл кач: 10
+    ctx: 装组合|耳饰+项饰|链子样式|延长链|流行元素|圆形|品牌	|无|
+N 1174 А2/Б колье|подвеска+серьги | val: '链子样式' | балл кач: 10
+    ctx: 子材质|耳饰+项饰|套装组合|延长链|链子样式|无|流行元素|对比
+N 1334 А2/Б колье|подвеска+серьги | val: '流行元素' | балл кач: 15
+    ctx: 装组合|耳饰+项饰|链子样式|延长链|流行元素|六边形|品牌	|利
+N 1475 А4 набор 4+ | val: '流行元素' | балл кач: 5
+    ctx: |耳饰+项饰+手饰|链子样式|延长链|流行元素|花朵|品牌	|无|
+N 249 чокер | colors: None | nsku 1 | k: один вариант — состав и цвет однозначны (5); коробка не заложена в себестоимость
+   库存: ['库存9670PCS']
+N 413 А3 набор 3 | colors: None | nsku 1 | k: один вариант — состав и цвет однозначны (5); коробка не заложена в себестоимость
+   库存: ['库存51729套']
+N 1039 брошь | colors: None | nsku 1 | k: один вариант — состав и цвет однозначны (5); коробка не заложена в себестоимость
+   库存: ['库存96个']
+N 1380 А2/Б колье|подвеска+серьги | colors: None | nsku 1 | k: один вариант — состав и цвет однозначны (5); коробка не заложена в себестоимость
+   库存: ['库存234套']
+№1481: А2/Б колье|подвеска+серьги ожидает проверки: вес — допущение, не из карточки (0); регулировка длины не указана — уточнить у продавца (0); фото на грани (ок, условно); сплав / по
+   компл: сборная пара проверена по фото (ок, условно), один металл и мотив (5); коробка не заложена в себестоимость (0)
+Extender false positives confirmed — 6 cards:
+  - №15, 1031, 1174, 1334, 1475: value captured as next param key (流行元素/链子样式) — the param 延长链 is a KEY with empty value in a `key|key|key|` joined param list (the "对比" param dump format: "链子样式|延长链|流行元素|圆形|品牌"). Format here is pipe-joined keys — value empty. So +5 extender is a false positive: value empty should not count as "has extender". №94: "调节功能|延长链||风格" — value empty (double pipe) → vacuous True → +5.
+  - №1475 got кач 5 (only extender), №1334 кач 15.
+
+  But wait — are these really false? "延长链" appearing as a param KEY in the 对比 (comparison) dump means the card's spec list INCLUDES the property "延长链" — the comparison section lists attribute names. Hmm, in 1688 "对比" section lists all spec keys of the product. Presence of key 延长链 with empty value... the actual spec table elsewhere might have 延长链：无 or 延长链：10cm. But here captured value is the next key → treated as HAS extender. Given the previous review treated 延长链：无 as "no extender", an empty value is ambiguous → shouldn't auto-grant +5. These are false positives worth flagging.
+
+  nsku_only 4 cards: №249 (чокер, colors None, 1 stock line "库存9670PCS"), №413, №1039 (брошь!), №1380. For these, colors list absent entirely and only ONE stock line → +5 "один вариант". But we saw the stock list is truncated on the page (№44: 8 colors, 1 stock line). So single 库存 line does NOT prove single variant — FALSE POSITIVES likely. E.g., №1039 брошь with 96 pcs stock — could still have multiple colors. These 4 got +5.
+
+  Wait, but earlier mismatch analysis: nsku UNDERcounts (7 vs 9, 1 vs 8). For these 4, nvar=1 → but real variants could be >1. Indeed the page stock table seems to show only the first SKU's stock (№44 case: 8 colors, only "库存999976P" one line — truncated view). So rule "nsku=1 → один вариант" is unreliable. Actually is it max() so when ncol exists it's fine; the risk is only when colors param missing AND the single stock line. 4 cards.
+
+  №1481: has 尺寸+цифра in leftover review text — but its кач first line is "вес — допущение" so wk False → sz irrelevant (needs wk and sz). So no impact here. Good, but it remains a latent risk if wsrc were карточка. Let me check what 尺寸 matched — review snippet. Fine.
+
+  Now №88/135: rows junk '品牌\t' — irrelevant since ncol=1 → nvar from ncol... wait ncol=1 and rows=17? For №88: colors param = 1 color, but weights table has 17 rows starting with '品牌\t'?? Let me look at №88 weights — probably the table is 品牌/价格 matrix? Anyway nvar=1 → +5. If the card actually has 17 SKUs (sizes), that's a false "один вариант". Let me check №88 and 135 quickly.
+
+  Then norms (rule 5), then HALF70 and final checks. Let me also check sz regex base: `尺寸\t?\n[^\n]*\d` — check some cards where 尺寸 value is not a size (e.g., "尺寸\n误差1cm" ok; "尺寸\n均码" no digit). And what about 尺寸 matching in the pipe-dump ("...|尺寸|..."?) — `尺寸\t?\n[^\n]*\d` requires newline after 尺寸... In pipe format "风格|简约||形状|不" the sz search for NECK uses (链长|长度|周长) variants; base sz uses 尺寸 with \n. Pipe dump has no \n after 尺寸 → no match. OK.
+
+  Non-neck sz: `(长度|直径)\t?\n?[^\n\d]{0,6}\d` on col(after sub)+t+wt. Note `[^\n\d]{0,6}` can cross tabs, e.g. "长度\t\n12cm" → after 长度: \t? consumes tab? Actually `\t?\n?` then `[^\n\d]{0,6}` — "长度\t\n12cm": \t? takes \t, \n? takes \n, then [^\n\d]{0,6} must match chars before digit — next char is '1' (digit) → 0 chars → \d matches ✓. But "长度：约12cm" fullwidth colon — [^\n\d]{0,6} matches "：约" ✓. Also danger: title containing "直径" for ring... rings aren't scored (else branch 0). For earrings: t may contain "直径8mm珍珠" — matches → sz. That's bead diameter — arguably legit size info for studs. Hmm.
+
+  Brooch size: any \d+cm/mm in col+t+wt → e.g., pin length 6cm ✓ legit-ish.
+
+  Now let me check brooch weights distribution + who gets 0/5; same for браслет/кольца набор adj; and check segments list. Also verify the old-review cases №995, 1163, 1172, 1184 now 0.
+
+• Правило 3: подтверждены 6 ложных «удлинителей». Теперь нормы посадки (правило 5) и старые кейсы.965 чокер total 55 тест 20–30 шт | кач 5 : ожидает проверки: размеров нет в карточке (0); указан удлинитель цепи (регулировка) (5); фото на грани (ок, ус
+    компл 0 : 14 вариантов цвета/состава в карточке — выбрать перед оплатой (0); коробка не заложена в с
+364 брошь total 45 не брать (баллы < 55) | кач 0 : ожидает проверки: размеров нет в карточке (0); вес броши 30 г — тяжелее 25 г или не подтверждён (0); фото на г
+    компл 0 : 4 вариантов цвета/состава в карточке — выбрать перед оплатой (0); коробка не заложена в се
+189 браслет total 40 не брать (баллы < 55) | кач 5 : ожидает проверки: размеров нет в карточке (0); регулировка размера не указана — уточнить у продавца (0); фото 
+    компл 0 : 2 вариантов цвета/состава в карточке — выбрать перед оплатой (0); коробка не заложена в се
+912 А2/Б колье|подвеска+серьги total 65 тест 20–30 шт | кач 5 : ожидает проверки: размеров нет в карточке (0); регулировка длины не указана — уточнить у продавца (0); фото пр
+    компл 5 : один вариант — состав и цвет однозначны (5); коробка не заложена в себестоимость (0)
+995 колье total 60 не брать (цена не подтверждена) | кач 5 : вес и размеры есть в карточке 1688 (5); удлинителя нет (延长链: 无) — длина фиксированная (0); фото на грани (ок, 
+    компл 5 : один вариант — состав и цвет однозначны (5); коробка не заложена в себестоимость (0)
+1163 чокер total 59 тест 20–30 шт | кач 10 : вес и размеры есть в карточке 1688 (5); удлинителя нет (延长链: 无) — длина фиксированная (0); фото проверено (ок,
+    компл 0 : 2 вариантов цвета/состава в карточке — выбрать перед оплатой (0); коробка не заложена в се
+1172 чокер total 54 не брать (баллы < 55) | кач 10 : вес и размеры есть в карточке 1688 (5); удлинителя нет (延长链: 无) — длина фиксированная (0); фото проверено (ок)
+    компл 0 : 2 вариантов цвета/состава в карточке — выбрать перед оплатой (0); коробка не заложена в се
+1184 бусы total 55 не брать (стоп-фактор) | кач 0 : ожидает проверки: вес — допущение, не из карточки (0); удлинителя нет (延长链: 无) — длина фиксированная (0); фото
+    компл 5 : один вариант — состав и цвет однозначны (5); коробка не заложена в себестоимость (0)
+6 чокер total 65 тест 20–30 шт | кач 0 : ожидает проверки: вес — допущение, не из карточки (0); регулировка длины не указана — уточнить у продавца (0);
+    компл 0 : варианты в карточке не распознаны — уточнить у продавца (0); коробка не заложена в себесто
+37 Г крест total 70 оплатить | кач 5 : вес и размеры есть в карточке 1688 (5); регулировка длины не указана — уточнить у продавца (0); фото проверено
+    компл 0 : 2 вариантов цвета/состава в карточке — выбрать перед оплатой (0); коробка не заложена в се
+сегменты: {'серьги': 245, 'Г крест': 22, 'чокер': 219, 'А3 набор 3': 143, 'набор прочий': 140, 'А2/Б колье|подвеска+серьги': 389, 'колье': 191, 'А4 набор 4+': 33, 'бусы': 31, 'кольца набор': 14, 'брошь': 34, 'браслет': 23, 'подвеска': 1}
+брошей: 34 | wsrc=карточка: 32
+броши >25г: [(40, 304), (30, 364), (32, 428), (40, 470), (88, 497), (30, 653), (30, 857)]
+броши без полных 15: 9 [(304, 40, 'заглушка → допущение'), (364, 30, 'карточка'), (428, 32, 'карточка'), (470, 40, 'допущение'), (497, 88, 'карточка'), (612, 20, 'карточка'), (653, 30, 'карточка'), (857, 30, 'карточка'), (1091, 10, 'карточка')]
+браслетов: 23 | +5 за регулировку: 10
+кольца набор: 14
+все кольцевые сегменты: Counter({'кольца набор': 14})
+серьги >20г: [(50, 44), (105, 30), (111, 30), (113, 32), (114, 25), (122, 32), (123, 22), (124, 63), (126, 38), (129, 35)] всего 55
+
+
+• Important observations:
+
+  1. Old-review cases fixed correctly:
+     - №965: no size from bead diameter ✓; 14 вариантов ✓ (but wait — 尾链款 in variants gave +5 extender via 尾链 rule — correct per new rule).
+     - №364: размер 0 ✓ (30 г брошь → 0 по весу, правильно по новой норме), 4 варианта ✓.
+     - №189, 912: no size from reviews ✓.
+     - №995, 1163, 1172, 1184: удлинитель 0 с причиной «延长链： 无» ✓ fixed.
+     - №6: no card → варианты не распознаны → 0 ✓ (fixed; total 65 → тест).
+     - №37: now 70 → оплатить. Its комплектность = 0 (2 цвета), кач 5 (вес+размер есть). Previously review said №37 had exactly 70 due to +5 variants; now variants 0 but total still 70?! Old review said: "№6 и №37 благодаря этому имеют ровно 70 и решение «оплатить»; без бонуса — 65, тест." Now №37 = 70 оплатить. Where does it get +5 now? кач 5 (вес и размеры есть) — did it have that before? The old-review issue for №37 was variants +5; now variants 0 but кач 5 appears... Let me check what changed — was the sz for №37 previously 0? The base sz regex on weights table `长(cm)\t宽(cm)...` line: "2\t2\t2\t8\t12\t" — the regex requires `[^\n]*\n[^\n]*\t\d` — line "2\t2\t2\t8\t12\t" ends with tab; `\t\d` — "12" preceded by \t ✓. So sz=True — was this already the case before round 3? Probably yes (base table check existed). So №37 previously: 70 = ...? Whatever — currently its 70 comes from вес+размер в карточке. But hold on: №37 is Г крест (cross necklace) — its size table says 2×2×2 cm, weight 12g — that's a tiny cross pendant... size 2cm — legit size info. OK.
+
+     So №37 remains exactly at threshold 70 → "оплатить". The old review's concern about threshold-70 fragility stands but via a different line.
+
+  2. Brooches: 7 of 34 >25 г → 0. 9 brooches without full 15. Reasonable. Is 25 g justified? A brooch >25g is heavy-ish but many fine brooches are 10-20g. It's a judgment call. Fine as norm.
+
+  3. Серьги: 55 pairs >20 г! That's a LOT — 55/245 = 22%. Pairs at 30-60 г are heavy earrings. Norm вес пары ≤20 г seems strict but the METHOD says "пара ≤20 г, одна ≤10 г". It's per METHOD. But wsrc for some may be допущение. E.g. №124 63г, №126 38г. Hmm — but is the weight from card the weight of ONE earring or the pair? №114: table shows 重量（g) 25 per SKU row — is that per piece or pair? If 25 is per ONE earring, pair=50. The METHOD assumes card weight = pair weight. Potential systematic issue: on 1688, weight is usually per piece (一件）. If cards list per-piece weight, then "пара ≤20" should be "2×piece ≤20 → piece ≤10". №114 earrings 9×14×2 cm, 25 g per piece — that's a big earring. As a pair 50 г — definitely heavy. Current rule gives 114 a pass (25≤20? NO — 25>20 → 0). Wait 25>20 → fails. OK.
+
+  Let me look at weights: for серьги, how is w computed from card? assemble.py probably. Let me check where w comes from — is it the table 重量（g) value (per SKU) or sum? №114: w=25, table says 25 per row. So w = per-SKU weight. If that weight is per one earring, pairs are 2×. This matters: current rule compares w≤20 — if w is per-piece, the pair norm would effectively be ≤10 г per piece. Either way it's a stricter interpretation. Hmm, but actually if the seller ships and weighs 一件 = one pair sometimes... Can't resolve without data. Flag as risk: unclear whether card weight is per piece or pair; inconsistent → ask seller. Actually, let me check some серьги where title says 一对/单只. №189 was браслет with "单只" (single). Let me search earring titles for 一对价/单只 to see whether cards distinguish. The weight norm risk: if 1688 重量 is per piece (typical), the check "пара ≤20" using per-piece weight is lenient by 2×... wait no — it compares per-piece weight to 20, so a "pass" means piece ≤20 → pair ≤40. The METHOD intends pair ≤20. So the check as implemented is 2× more lenient IF w is per-piece. Conversely if w is pair weight, it's correct. Which is it? Check a few серьги: №111 w=30. As a pair 30г is plausible for statement earrings; 15г each. Ambiguous. Flag as risk, suggest clarifying.
+
+  Actually, I could check the same product's WB analog... too deep. Flag it.
+
+  4. Браслеты: only 10/23 get +5 за регулировку. Others 0. Fine.
+
+  5. Кольца: only "кольца набор" segment exists (14 позиций). Individual rings segment doesn't exist in this order. OK.
+
+  Now HALF70 check + plan integrity + econ/dead code + dup check. Also check `r["qty"]` — where does qty come from? items.json has "qty"? In consensus_canon: `min(50, r["qty"])`. Check qty field presence. Also check the "тест следующей очередью" groups.
+
+  Also check the claim "рекомендованный (строгий, 70–74 балла по 25 шт) ¥151 675 / 517" ✓ verified above.
+
+  Also double-check the "оплатить 50" first-wave count and the printed stats: "ровно 70 баллов: в «оплатить 50» первой волны X | 70–74 в первой волне Y | ровно 70 среди всех оплатить 232". Whatever.
+
+  Q3 residual: the ¥1887 sets — note the sets component №114 (5.1 ¥) used 4×. Also necks like №53 (cny?). Check: do sets include any position that is ALSO in plan as "оплатить 50" creating 60 units — fine.
+
+  But here's a subtle thing: sets line y = 10×cny where cny=neck+ear. The individual lines y = cny×q. Total ¥ counts each unit once. OK, no double counting. Confirmed.
+
+  One more possible issue in consensus_canon.py line 18: `elif hr >= 1.0 or d == "оплатить": T[...]` — positions with hr>=1.0 OR decision оплатить go to test-group T keyed by (q0, style). If d=="оплатить" but hr<1.0 (e.g., hr None→0?), wait hr None → `hr = r.get("headroom") or 0` → 0; then line 16 needs hr>=1.15 for оплатить 50 — оплатить with hr 0 falls to line 18 (d==оплатить → T → тест 10). So ALL оплатить with hr<1.15 become тест 10 (or queued). And оплатить с hr>=1.15 и в HIT → тест via line 18? HIT check only in line 16; HIT items fall to line 18 since d==оплатить → T — they get grouped into тест 10 by CAP. OK per docstring.
+
+  Note: line 18 `elif q0 == "свадебный комплект бижутерии" and hr < 1.15` comes BEFORE hr>=1.0 → wedding sets without headroom → весна. OK.
+
+  Also note: positions with decision "тест 20–30 шт" (d startswith тест) and hr>=1.0 → T → тест 10. With hr<1.0 → line 19 "отложить (нет запаса)" q=0. Hmm — "тест" решение but запас <1.0 → отложить. Docstring says "остальные «оплатить»/«тест» с запасом ≥1,0 → тест 10 шт; запас <1,0 → отложить". ✓ consistent.
+
+  Now, does `d.startswith("тест")` catch "тест 20–30 шт"? yes.
+
+  Check plan qty vs r["qty"]: r["qty"] exists? Let me verify items have qty. Also check "оплатить 50" actually min(50, qty) — if qty<50, e.g. qty=30 → q=30. Fine.
+
+  Now the last verification: run the whole-chain consistency — plan files match recomputation? I recomputed totals already from plan JSON + cny — totals matched brief. Also verify scored.json == scored_ref.json? The brief claims chain re-run matched. scored.json (17871176) vs scored_ref.json (17868984) — different sizes. scored_before_round3.json == scored_ref.json byte size. Let me diff scored.json vs scored_ref.json to see which fields differ — could be decisionCANON etc. Actually scored_ref is probably a copy made at some point. Quick diff of first differing keys.
+
+  Also check `econ` dead filter — "экономика: не проходит 1482" printed — but decisions use decisionCANON. The old `decision` field in scored.json — is it used anywhere downstream? orders_plan.py? market_sheet? Probably legacy. Minor.
+
+  One more check for Q4: "дубли 3" — in decisionCANON: 'не брать (дубль №1133)': 1, 'не брать (дубль №273)': 1, 'не брать (дубль №106)': 1 — 3 dups ✓ (decisions set by apply_dups.py presumably before price_check).
+
+  Let me now check HALF70 correctness: entries "оплатить 25 (70–74 балла)" should have 70<=total<75. And qty = min(25, qty). Verify from plan json. Also compute how many.
+
+• Проверяю HALF70, целостность плана и остаточные вопросы.оплатить 25: 189 | вне диапазона 70-74: []
+оплатить 50: 203 | min total: 75
+действия: Counter({'тест следующей очередью': 479, 'оплатить 50': 203, 'оплатить 25 (70–74 балла)': 189, 'отложить (нет запаса)': 114, 'тест 10': 110, 'набор 10': 15})
+qty>лимита заказа: [] 0
+дубли: ['не брать (дубль №1133)', 'не брать (дубль №273)', 'не брать (дубль №106)']
+1485 1485
+расхождений: 180
+[('R', 73), ('total', 44), ('decisionCANON', 12), ('decisionSPP', 12), ('decision1330', 10), ('whyCANON', 9), ('decisionWB', 9), ('whySPP', 7), ('whyWB', 4)]
+[(155, 'decisionCANON'), (155, 'decisionSPP'), (155, 'R'), (155, 'whyCANON'), (156, 'total')]
+
+
+• scored.json vs scored_ref.json: 180 differing positions — R (73), total (44), decisionCANON (12)... So scored.json is NOT identical to scored_ref.json. The brief says "Цепочка прогнана на копии и в рабочей папке, scored.json совпали" — maybe scored_ref isn't the copy reference but something else. The differences at №155+ look like a block of positions — maybe №155–... are exactly the 16 refetched + related? 180 diffs though. Let me check the range of differing positions. decisionCANON differs at 12 positions — that's concerning for reproducibility claims. But maybe scored_ref.json is stale (before round 3) — scored_before_round3.json has same byte size as scored_ref (17868984) → scored_ref == scored_before_round3? Let me verify equality. If scored_ref IS scored_before_round3, then the differences are simply the round-3 changes (blocks 5-6 + refetch16). R differs 73, total 44 — plausible for the round-3 changes (quality/комплектность edits). decisionCANON differs at 12 — positions whose total changed across 55/70 boundaries. That's consistent with round 3 edits, not a reproducibility failure.
+
+  Let me confirm scored_ref == scored_before_round3.
+
+  Also HALF70: 189 positions "оплатить 25" all in 70–74 ✓; 203 "оплатить 50" min total 75 ✓. Consistent with code.
+
+  Note: 189 = the number the old review mentioned for first-wave 70–74. Fine.
+
+  Remaining checks:
+  - Брошь №304, №470 wsrc = 'заглушка → допущение'/'допущение' — no card weight → 0. OK.
+  - Check sz base false positives: 尺寸 param where value isn't product size — scan кол-во случаев, где sz=True только через 尺寸\t?\n с подозрительным значением (напр. "尺寸\n1-2cm误差"? that's error tolerance — legit?). Let me sample a few.
+  - Also check the `rows` fallback with junk '品牌\t' header lines — only used when ncol/nsku None; the split [2:] skips 2 header lines but for №88-like tables (with 品牌 header as line 3?) — whatever, counts rows>1 → "не распознаны"? No wait — rows used only if both ncol,nsku None: nvar=len(rows). If rows=17 junk → nvar=17 → "17 вариантов" → 0 баллов — could be FALSE "не распознано/много вариантов" when actually unknown. №88 has ncol=1 so not affected. Count cards where nvar came from rows: earlier ncols_missing empty (0 cards +5 by rows). How many have nvar from rows and 0 points? Let me count quickly.
+
+  Actually let me just count nvar-source distribution overall: how many cards have nvar None (не распознаны), ncol-based, nsku-based.
+
+  - Also Q2 justification: brooch 25g — cite typical brooch weights? I can't fact-check precisely; note as reasonable. Bracelet adjustability: 延长 in regex — wait, regex `可调|开口|活口|弹力|延长|伸缩|尾链` — "延长" for bracelets could match prose like "延长使用寿命" (as seen in earring title context) → false +5 for bracelets. Check bracelets matching 延长 in prose. Also "尾链" — bracelet with tail chain? that's more necklace. Minor.
+
+  - Check bracelet adj matches context: scan the 10 bracelets with +5 and see matched keyword.
+
+  - Also `кольца набор` — 14 позиций, check their scores.
+
+  - Verify sets_canon W() default: W(a)+W(b) with default 30 each when missing. If both missing → 60 г assumed → 0.285×60=17 ₽. Minor.
+
+  - One more important check on rule 2 for necklaces: `(链长|长度|周长)\t?\n?[^\n\d]{0,6}\d` on col+t — "长度" in TITLE could match necklace titles like "长款" no. But "项链长度40cm" in prose desc? col doesn't include desc. But the "对比" pipe dump: "...|链子样式|延长链|流行元素|..." — 链长 vs 链子样式 — careful: 链长 is chain LENGTH; 链子样式 is chain STYLE — regex `链长` won't match 链子. OK. But what about "链长" appearing as key with empty value in pipe dump (like 延长链 above) → `链长|流行元素` — `\t?\n?` none, `[^\n\d]{0,6}` matches "|流行元" (6 chars) then \d? next char is 素 → fail... then regex engine tries other positions — no digit within 6 → no match. OK unless next key has digit: e.g. "链长|2024年春季" → [^\n\d]{0,6} = "|" then digit "2024" → MATCH → sz=True from a YEAR! Ha — pipe dump "上市年份/季节\n2024" — but that's a separate param 年份 not 链长. For 链长 pipe-neighbor with digit: possible "链长|5cm"? then it's real value. Eh — edge. Let me scan neck items where sz=True and matched only via this regex on col (not wt table, not cm≥30) and value looks like a year (19|20\d\d).
+
+  Let me also check the base sz `尺寸\t?\n[^\n]*\d` matching year-ish values "尺寸\n2022年夏季"? Hmm "上市年份/季节\n2026年夏季" — different key. "尺寸\n均码" no digit.
+
+  Enough. Run the remaining targeted checks, then verify scored_ref==scored_before_round3, then check №88/135 weights tables, bracelet matches, and year-false-positive scan.scored_ref == scored_before_round3: True
+источники nvar: {'ncol': 1308, 'None': 25, 'max(ncol,nsku)': 147, 'nsku': 5}
+колье: год рядом с 链长/长度/周长: [] 0
+N 175 开口 : 生产编号	|夸张珍珠合金开口手镯||样式	|女式|	
+N 216 弹力 : 	100欧美跨境褶皱圆片弹力手链轻奢高级感手环个性夸
+N 217 开口 : 南韩之尚欧美跨境热销C形开口宽边手镯个性夸张光面手环
+N 218 开口 : 之尚跨境欧美ins风树脂开口手镯琥珀纹理晕染小众高级
+N 224 伸缩 : 连续爱心S纹手镯、镶钻仿伸缩钢带手镯、麦穗菱纹镶钻手
+N 281 弹力 : 行元素分欧美跨境夸张多层弹力手镯 个性设计感不规则复
+N 291 可调 : 满意，戴上很漂亮。圈口不可调节，我平时戴56、57圈
+scored_ref == scored_before_round3 → the 180 diffs are exactly the round-3 changes. Reproducibility claim OK.
+
+  Bracelet №291: matched "可调" inside a REVIEW snippet: "满意，戴上很漂亮。圈口不可调节..." — "不可调节" = NOT adjustable! But regex finds 可调 → +5 "регулировка указана". FALSE POSITIVE — review text (leftover, not cut because it's in the 61 uncut review summaries or another review block format). №291 got +5 wrongly. Let me verify №291's review region: is this in col after cut? The snippet "满意，戴上很漂亮。圈口不可调节" — review content. Where does it live — colors leftover. Let me check. Also check other segments' review leftovers for 可调/开口/尾链 etc. affecting bracelets/rings.
+
+  nvar sources: ncol 1308, max 147, nsku 5, rows 0, None 25. So:
+  - 25 cards "не распознаны" (None) → 0. ✓ honest.
+  - nsku-only 5: 4 got +5 (single stock line) + 1 with nsku>1. As analyzed, single-stock-line ≠ single variant → 4 likely false +5 (№249, 413, 1039, 1380).
+  - max(ncol,nsku) 147: nvar=max — when ncol>nsku, ncol wins (e.g., 9 vs 7). Fine-ish. When nsku>ncol (ncol undercount?) — e.g. colors list truncated? max picks nsku. Conservative. OK.
+
+  But wait — one more direction: ncol from 颜色 list — the list itself can be TRUNCATED in colors (e.g. №965 colors line had 13+ items; counted 14 ✓). Values with '、' separators counted. Some color lists use spaces or '/' separators — undercount → false "один вариант" when list is "金色 银色" space-separated? Then ncol=1 → +5 wrongly. Let me scan colors values without 、 but with spaces/slashes and multiple tokens. E.g. "金色/银色" or "金色 银色". Quick scan.
+
+  Also №88/135 rows junk — not used (ncol=1). Fine.
+
+  Now the sz base check `尺寸\t?\n[^\n]*\d` — scan what values follow 尺寸 to see if any junk (years?). And earrings sz via mm — sample.
+
+  Also check the second quality line for earrings: `w <= 20` — w is per-SKU weight from table; pair question stands.
+
+  Let me also look at №291's raw colors to confirm the review-leftover origin and see which other adj-matching bracelets/rings matched keywords inside 不可调节/评语. Check rings: 'N号' regex for кольца набор. Fine.
+
+  Also — one more potential issue in rule 2: for NECKSEG, `尺寸` base check (line 117) still applies: `尺寸\t?\n[^\n]*\d` in col. For a necklace, 尺寸 param could be bead size "尺寸\n8mm"?? wait 8mm — [^\n]*\d matches "8" → sz=True for necklace from bead diameter — the exact thing rule 2 was meant to exclude! The NECKSEG branch only ADDS chain-length patterns; it doesn't REMOVE the base 尺寸 match. №965: does its colors contain 尺寸？ Earlier snippet: no 尺寸 param. But other pearl necklaces may have 尺寸\n10mm → sz=True via base. Let me scan NECKSEG items where sz=True via 尺寸-param with mm value (bead size) → false +5. This is a REAL bug in rule 2: the base sz rule wasn't restricted for necklaces.
+
+  Let me quantify: for NECKSEG items, find where base regex 尺寸\t?\n[^\n]*\d matched but chain-length patterns didn't, and the 尺寸 value contains mm/毫米 (bead diameter suspicion) or is a small number.
+
+• Ключевая находка: базовое правило `尺寸` не ограничено для колье. Проверяю масштаб и остальные хвосты.колье: sz только через базовое 尺寸: 2
+(988, 'А2/Б колье|подвеска+серьги', '17*12*1cm')
+(1481, 'А2/Б колье|подвеска+серьги', '长约68+5cm')
+№291 seg: браслет
+raw ctx: %|t**6|1件|外观很美，颜色也很满意，戴上很漂亮。圈口不可调节，我平时戴56、57
+есть ли блок 商品评价 в col: True 商品评价
+商品属性
+кач: вес и размеры есть в карточке 1688 (5); регулировка размера указана (开口/可调/弹力/延长 или размеры) (5); фото на грани (ок, условно) (0)
+цвета без 、, с / или пробелом: 52
+(22, 'G318 钛钢链条铜微镶吊坠')
+(26, '珍珠项链 镀真金')
+(74, '金色项链套装 5999,白k项链套装 5999')
+(128, 'CK0893 金色')
+(135, '金色 4250')
+(140, '花瓣耳环 925银针 镀真金')
+(142, '玻璃+CCB 桃心圆珠拼接项链 6875101HB')
+(146, '蝴蝶耳环 925银针 镀真金')
+(166, '金色 4142')
+(174, '不规则交叉波浪手镯3件套 6685901HB')
+(191, '金色 4101')
+(193, 'XL5087 项链-金色')
+(205, 'CCB光面手镯 5件 6841101')
+(209, 'CCB几何方形圆圈手镯4件 6812301HB')
+(215, 'CCB+珍珠 不规则爱心珍珠手链手镯4件套 6752001HB')
+
+
+• Findings:
+
+  1. NECKSEG base 尺寸： only 2 cases, and both are legit sizes (17*12*1cm pendant size; 长约68+5cm chain length). So no bead-diameter false positive currently — but the latent hole is real only in theory. Actually wait — earlier №965 didn't match. OK — the base 尺寸 hole is small in practice (2 cases, both legit). Downgrade to risk.
+
+  Hmm wait, but actually let me check more broadly: 尺寸 values with mm for necklaces. The scan covered base_chicun and not neck_chain — only 2. And with neck_chain also matching... A bead "尺寸\n8mm" necklace where 链长 absent → would appear in my fp list. Only 2 items. OK.
+
+  2. №291: review leftover confirmed — "圈口不可调节" (bangle NOT adjustable) inside review text that wasn't cut (the card's review block format differs: "商品评价\n商品属性..." navigation-style then later review snippets). The cut regex removed only the 评分-summary style block. Review snippets ("t**6|1件|外观很美...") remain in col and gave +5 "регулировка указана". FALSE POSITIVE confirmed with weight: №291 кач 10 вместо 5. Its total? Let me check — could tip threshold. Also similar leftovers could hit other keywords (开口/弹力/尾链/延长/可调 for bracelets/rings/necklaces 尾链; mm/cm digits for sz; 颜色 for ncol...). №1481 reviewed earlier — was ожидание so no effect.
+
+  Let me scan ALL leftovers (61 cards) for keyword impacts: for each of 61, check if removing review-snippet region changes any of: sz, ext, adj, ncol. Simpler: search the 61 cols for regexes 可调|开口|活口|弹力|延长|伸缩|尾链 and see which items got +5 from those and whether the match context is review-ish (near 评价|满意|漂亮|戴上|买).
+
+  3. Colors without 、: 52 cards — e.g. №74 "金色项链套装 5999，白k项链套装 5999" — has comma "," (English? "5999，白k" — that's a fullwidth ，actually: "5999，白k" uses ，). My scan excluded only if '、' not in v — №74 has '，' → re.split includes '，' ✓ ncol=2. №135 "金色 4250" single. №26 "珍珠项链 镀真金" single. So space-separated multi-color lists like "金色 银色"? Not in first 15. Let me refine: cards where value has no 、,，,/ but has space-separated color words... Actually '/' present in some — e.g. №193 "XL5087 项链-金色" single. Need smarter check: does any 颜色 value with ncol==1 actually contain two color tokens (金|银|色 words separated by space or /)? Let me scan with pattern (金色|银色|白K|玫瑰金|黑色|白色).*( |/|，)(金色|银色|...) when ncol==1.
+
+  Let me also check №88/135 to close.
+
+  Also need to double check the impact counts: how many positions got комплектность +5 via ncol==1 (360) — among them, colors list "单只" cases like №189 "金色单只 2022、白K单只 2022" ncol=2 ✓. Fine.
+
+  Let me also scan colors values with '(' bracket variants — "金色（ Premium）" — whatever, counted as 1 — the variant may be one. OK.
+
+  One more: the 库存 max() — when ncol is None and nsku>1 → nvar=nsku from TAIL list — undercounts real variants but stays >1 → 0 points. Only single-stock-line cards get +5 wrongly (4). Plus №1039 брошь.
+
+  Now check threshold impact of the confirmed false positives:
+  - №15, 94, 1031, 1174, 1334, 1475: +5 extender (should be 0).
+  - №291: +5 adj (should be 0).
+  - №249, 413, 1039, 1380: +5 variants (uncertain, likely wrong).
+  Check their totals & decisions; see if any "оплатить" flips.
+
+  Also check №988 — sz via 尺寸 17*12*1cm — that's pendant size — legit.
+
+  Also — one more thing to verify in rule 4: `mc = re.search(r"颜色\t?\n([^\n]+)", col)` — colors value line could contain trailing spaces/periods; fine.
+
+  And `nsku` uses `d.get("weights")` raw INCLUDING tail — 库存 appears 3590 times in TAIL — but these are the page's SKU stock lines (that's exactly the SKU list of the page). Wait — actually is the TAIL stock list the full SKU list or truncated? №21: 7 lines vs 9 colors. The stock list on 1688 product page shows each SKU's stock — if all 9 SKUs in stock, expect 9 lines. Got 7 → scraper captured partially, or 2 SKUs out of stock don't show lines, or colors list has 2 phantom entries. Can't fully resolve; but the observed asymmetry proves nsku unreliable as "true variant count". Using max(ncol,nsku) mitigates when colors exist. The 4 single-line cases remain false "+".
+
+  Actually wait — maybe the 库存 lines correspond to sku rows in the page's SKU table which often only includes SKUs with stock>0... For №44: 8 colors, 1 line 库存999976P — only ONE SKU shown? The scraper probably captures only the visible portion. So yes unreliable.
+
+  Let me now quantify threshold flips for the false positives, then check №88 quickly, then wrap up with HALF70/plan checks already done. Also double-check sets_canon inv: uses W(a)+W(b) — the set economics — and pack 20 ✓, single ФФ 22 ✓ consistent with price_check_canon per-position treatment.
+
+  Also Q3 fully answered: no ¥ double counting; quantities consistent.
+
+  One more check — the brief says "№114 — 10 шт поштучно + 40 в наборы" — qty 50 ✓ (plan 10 + 40).
+
+  Also confirm the 库存 `\n库存\d` misses "库存：9670" formats — how many cards have 库存 followed by non-digit? irrelevant.
+
+  Impact check now.
+
+• Оцениваю влияние ложных срабатываний на пороговые решения и проверяю оставшиеся хвосты отзывов.ключевые слова в отзывных остатках: 5
+(291, 'браслет', '可调', '|t**6|1件|外观很美，颜色也很满意，戴上很漂亮。圈口不可调节，我平时戴56、57圈口的手镯，戴')
+(665, 'А2/Б колье|подвеска+серьги', '延长', '复古||扣件类型\t|龙虾扣开合顺畅，牢固不易松脱；尾部带多环延长链，可以自由调节佩戴周长，适配不同颈围，')
+(665, 'А2/Б колье|подвеска+серьги', '周长', '扣开合顺畅，牢固不易松脱；尾部带多环延长链，可以自由调节佩戴周长，适配不同颈围，可微调高低位置。||适用')
+(846, 'набор прочий', '延长', '风格分类\t|个性风潮||适用人群\t|女式||调节功能\t|配有延长链。长短松紧可以自行调整。胖瘦均可佩戴。')
+(1119, 'колье', '尾链', '/ 枝叶||风格分类\t|文艺复古||扣件类型\t|项链龙吓扣和尾链支持长短调节，适配不同颈围，佩戴贴合舒适')
+15 А2/Б колье|подвеска+серьги total 75 | оплатить | компл 5 кач 5
+94 А2/Б колье|подвеска+серьги total 70 | оплатить | компл 0 кач 0
+1031 А2/Б колье|подвеска+серьги total 65 | тест 20–30 шт | компл 0 кач 5
+1174 А2/Б колье|подвеска+серьги total 60 | тест 20–30 шт | компл 0 кач 0
+1334 А2/Б колье|подвеска+серьги total 65 | тест 20–30 шт | компл 0 кач 5
+1475 А4 набор 4+ total 50 | не брать (баллы < 55) | компл 0 кач 0
+291 браслет total 35 | не брать (баллы < 55) | компл 0 кач 5
+---возможные переводы через 70/55 при -5:
+94 70 -> 65 | было оплатить
+nsku-only 249 чокер total 75 оплатить
+nsku-only 413 А3 набор 3 total 60 тест 20–30 шт
+nsku-only 1039 брошь total 80 оплатить
+nsku-only 1380 А2/Б колье|подвеска+серьги total 65 тест 20–30 шт
+
+
+• Wait — №94's кач 0? Earlier I saw it got extender +5 via empty value... now it shows кач 0. Let me re-check: earlier the suspicious-value scan printed "N 94 ... val: '' | балл кач: 10". Now it shows кач 0. Hmm — the difference: earlier script checked `ex.group(1) in suspicious` where suspicious included ''. It printed балл кач 10. Now кач 0?! Let me recheck — oh wait, earlier script printed `'| балл кач:',r['R']['качество'][0]` — it printed 10 for №94. Now printing кач 0. Contradiction!
+
+  Hold on — earlier output line: "N 94 А2/Б колье|подвеска+серьги | val: '' | балл кач: 10". Now: "94 ... кач 0". One of them read a different index? Both use s[n-1]... R should be same file. Unless... earlier script printed r['R']['качество'][0] — same. Weird!
+
+  Oh! I see — in the FIRST extender script, `suspicious=['流行元素','链子样式','使用寿命','批发仿绿碧玺','、（铜镀白金色）','']` and condition `r['seg'] not in NECKSEG: continue` — №94 seg А2/Б — in NECKSEG → not skipped. Printed балл кач 10. Now script prints кач 0 for №94?? Let me re-verify by direct lookup. Possibly I misread which line was №94. Earlier output:
+
+  "N 94 А2/Б колье|подвеска+серьги | val: '' | балл кач: 10"
+
+  Now: "94 А2/Б колье|подвеска+серьги total 70 | оплатить | компл 0 кач 0"
+
+  Contradiction. Let me directly inspect №94's R.
+
+  Also the threshold flip analysis printed "94 70 -> 65" meaning current total 70 with decision оплатить. If extender +5 is part of кач, then кач 0 means no extender points... confused. Check №94 directly.
+
+  Note the review-leftover keyword hits: №665 （延长/周长 in review — affects sz and ext), №846 （配有延长链 — actually product description param 调节功能 — legit-ish, not review), №1119 （尾链 in 扣件类型 param — legit). №665's is review text ("龙虾扣开合顺畅...尾部带多环延长链") — that's a review snippet giving sz+ext → +5+5 possibly. Check №665 кач.
+
+  Let me inspect №94, 665 details.
+
+• Противоречие по №94 — проверяю напрямую.№ 94 А2/Б колье|подвеска+серьги total 70 оплатить
+  кач: [0, 'ожидает проверки: размеров нет в карточке (0); регулировка длины не указана — уточнить у продавца (0); фото на грани (ок, условно) (0)']
+  компл: 0
+№ 665 А2/Б колье|подвеска+серьги total 60 тест 20–30 шт
+  кач: [0, 'ожидает проверки: размеров нет в карточке (0); регулировка длины не указана — уточнить у продавца (0); фото на грани (ок, условно) (0)']
+  компл: 0
+№ 846 набор прочий total 65 тест 20–30 шт
+  кач: [0, 'ожидает проверки: размеров нет в карточке (0); регулировка длины не указана — уточнить у продавца (0); фото на грани (ок, условно) (0)']
+  компл: 0
+№ 1119 колье total 55 не брать (цена не подтверждена)
+  кач: [5, 'ожидает проверки: размеров нет в карточке (0); указан удлинитель цепи (регулировка) (5); фото на грани (ок, условно) (0)']
+  компл: 0
+№94 ex: ''
+ctx: 性	|正常佩戴1-3个月||调节功能	|延长链||风格	|简约||形状	|不规则||重量	|44
+
+
+• №94: кач 0 — so ext=False. Why? ex.group(1)='' → `re.match(r"\s*(无|没有|否|0\b)", "")` — matches! Empty string matches any regex with * — `\s*` matches empty, then alternation... wait `re.match(r"\s*(无|没有|否|0\b)", "")` — `\s*` matches empty, then needs 无|没有|否|0 — at empty string, no char → no match... Actually re.match with `\s*(无...)`: \s* can match zero chars, then the group needs at least one char — empty string has none → returns None. So not re.match → `not None` = True → ext=True. Hmm but then ex=True → ext True → +5. But actual кач shows 0 for extender!
+
+  Wait — look at the reason text: "регулировка длины не указана" — that's the `else` branch (ex falsy). So ex was falsy?! But we just reproduced ex with group ''. re.search returns a match object — truthy even with empty group. Unless... in score.py the search string is `col + "\n" + t` — same as here. Same pattern. Hmm, but score.py line 132-133:
+
+  ```
+  ex = re.search(r"延长链?\t?\n?([^\n]*)", col + "\n" + t)
+  ext = bool(ex and not re.match(r"\s*(无|没有|否|0\b)", ex.group(1))) or has(r"尾链", col + t)
+  ```
+
+  Hold on — re.match(r"\s*(无|没有|否|0\b)", "") — let me actually test: `re.match(r"\s*", "")` matches. With the group required — no. Let me just run python to check. Actually easier: maybe re.match(r"\s*(无|没有|否|0\b)", "") returns a match because... no, alternation requires one of those literals. Empty → None. So not None → True; ex truthy → ext=True. But the scored reason says otherwise...
+
+  OH WAIT. I misread. Look again at the ext logic:
+  `ext = bool(ex and not re.match(...)) or has(尾链)`. 
+
+  But the appends:
+  ```
+  q.append((5, ...) if ext else (0, "удлинителя нет (延长链: 无) — длина фиксированная" if ex else "регулировка длины не указана — уточнить у продавца"))
+  ```
+  №94 shows "регулировка длины не указана" → ex was FALSY in the scored run. But my reproduction shows ex truthy (group ''). Why the difference? The col in my reproduction — I used same cut regex... Wait, maybe the difference: `t` — the title. In score.py: `ex = re.search(r"延长链?\t?\n?([^\n]*)", col + "\n" + t)`. In my script: same. Hmm, same.
+
+  Unless the ex match in scored run happened on an OLD version of the file?? scored.json was written by the final score.py run. My reproduction now uses the same scored.json + same regex → should be identical.
+
+  Hmm wait, let me recheck: has(r"尾链", col+t) — №94 ctx shows no 尾链. And the reason text is the ex-falsy branch. So in the scored run, ex was None or falsy. Why?
+
+  AH — I see it! In score.py, `col` at line 132 — is it the same col? Yes, col defined at 113. Hmm.
+
+  Let me test precisely: maybe re.search with pattern `延长链?\t?\n?([^\n]*)` on the string — the match might be at a position where... it returns match with group ''. bool(match)=True. So ext=True → +5. But scored says 0.
+
+  Wait, maybe I should check: is "延长链" even in col for №94 — the ctx I printed came from (col+"\n"+t). The match "调节功能\t|延长链||风格" — that includes literal "\t|" — meaning in col the text is "调节功能" TAB NEWLINE? No — I replaced \n with | for display. The raw is "调节功能\t\n延长链\t\n\t\n风格" perhaps — keys each on own line with empty values. So 延长链 followed by "\n" then next line empty "\n"... pattern: `延长链?\t?\n?([^\n]*)` — after 延长链： `\t?` none, `\n?` consumes \n, `([^\n]*)` captures "" (empty line) → group ''. ex truthy.
+
+  So why did scored run get ext False?? Let me actually run the EXACT score.py lines and compare. Maybe... the ex regex in score.py line 132 searches `col + "\n" + t` — but `has(r"尾链", col + t)`. For №94, ex truthy → ext = True or ... → True. +5 expected. But scored.json says 0 with reason "не указана" (ex falsy). 
+
+  UNLESS: the ex object is falsy when group... no. Match objects are always truthy.
+
+  Hmm, wait — maybe I mis-identified №94's seg at scoring time? No — seg is stored.
+
+  Let me just rerun the exact block-5 code for №94 from score.py verbatim and see.
+
+  Actually — hold on. Look at score.py line 132 again as READ earlier:
+
+  ```
+  ex = re.search(r"延长链?\t?\n?([^\n]*)", col + "\n" + t)
+  ```
+
+  Hmm wait, but earlier printed ctx for №94 was "调节功能\t|延长链||风格" — is that in col or in t? The pipe-replacement shows \n→|. So sequence "调节功能" \t? \n "延长链" \n "" \n "风格". So col contains "延长链" as standalone line. ex.search finds it → match. group(1) = ''. 
+
+  re.match(r"\s*(无|没有|否|0\b)", "") → None → `not None` → True → ext True.
+
+  So score.py WOULD give +5. But scored.json has 0. Contradiction → maybe scored.json was generated by a DIFFERENT version of score.py (e.g., score_before_round3? no...). The file score.py we read is the final. Let me literally exec the relevant lines on №94 data.
+
+  Actually — wait. Let me recheck the suspicious-scan output from before: it printed "N 94 ... | балл кач: 10". That read r['R']['качество'][0] = 10?! And now reading the same file, №94 кач = 0. That's impossible for the same file... unless json.load ordering — no.
+
+  Let me look again at the earlier output very carefully:
+
+  "N 94 А2/Б колье|подвеска+серьги | val: '' | балл кач: 10"
+
+  Hmm — but in THAT script I printed `'| балл кач:',r['R']['качество'][0]` — that came AFTER a `continue` filter `if r['seg'] not in NECKSEG: continue`. №94 А2/Б in NECKSEG ✓. So it printed кач 10 for №94.
+
+  Now the latest script printed "94 А2/Б колье|подвеска+серьги total 70 | оплатить | компл 0 кач 0".
+
+  Both read scored.json s[93]['R']['качество'][0]. Contradiction! Unless... json.dump with ensure_ascii — no. Let me directly check: maybe in the FIRST script, `s=json.load(open('scored.json'))` — same. 
+
+  OH WAIT. I see it now! In the first script I looped `for i,r in enumerate(s)` and checked `ex.group(1) in suspicious` — suspicious included ''. For №94, ex.group(1)=''. But hold on — the match I found NOW for №94 gives group ''. In the FIRST script, the ex was computed with the SAME formula... and printed 'балл кач: 10'.
+
+  Hmm, unless the first script's r['R']['качество'] for №94 — is [0] the score? R values stored as lists [score, reason]. Yes.
+
+  Let me just directly re-read №94 from scored.json twice to rule out script bug. Actually — could there be TWO items numbered 94? No, enumerate index.
+
+  Actually — I bet the first script had a subtle bug: `suspicious=['流行元素','链子样式','使用寿命','批发仿绿碧玺','、（铜镀白金色）','']` — `ex.group(1) in suspicious` — group(1) for №94 was '' which IS in list. Printed кач 10. And NOW r['R']['качество'][0] prints 0. Direct contradiction on the same JSON file... UNLESS the file changed between runs?! The user said the chain was re-run on a copy AND in the working folder, scored.json совпали. Maybe something re-wrote scored.json between my two script runs?? The mtime... First ls showed scored.json 22:32. Hmm.
+
+  Wait — no. Look at the first suspicious-scan output again:
+
+  N 15 ... балл кач: 10
+  N 94 ... val: '' | балл кач: 10
+  N 1031 ... балл кач: 10
+  N 1174 ... балл кач: 10
+  N 1334 ... балл кач: 15
+  N 1475 ... балл кач: 5
+
+  And the direct read now: 94 → кач 0. Let me re-run a minimal direct check to settle it.
+
+• Проверяю противоречие по №94 повторным прямым чтением.direct: 5 вес и размеры есть в карточке 1688; длина цепи не указана — уточнить у продавца (5); регулировка длины не указана — уточнить у продавца (0); фото на грани (ок, условно) (0)
+ex found: True | group: ''
+re.match 无...: False
+ext = True
+file md5: 3613735d50be44b105910c4c935bf742
+mtime: 1793310123.19 size: 17904848
+
+
+• Now №94 shows кач 5 with reason "длина цепи не указана — уточнить у продавца (5)"?! That's a THIRD variant of the reason text — "длина цепи не указана" doesn't exist in the score.py I read! The score.py line 134 has:
+
+  ```
+  q.append((5, "указан удлинитель цепи (регулировка)") if ext else (0, "удлинителя нет (延长链: 无) — длина фиксированная" if ex else "регулировка длины не указана — уточнить у продавца"))
+  ```
+
+  "длина цепи не указана — уточнить у продавца (5)" — this is a DIFFERENT message with score 5! And file size changed: 17904848 now vs 17871176 in the first ls! mtime 1793310123 — the file is being REWRITTEN while I review! Someone/something is running the pipeline right now in this folder.
+
+  Whoa. This invalidates my earlier numeric verifications?? The first ls showed scored.json 17871176 bytes at 22:32. Now it's 17904848. The file changed between my checks. That explains the №94 contradiction (first read: кач 10; second: 0; third: 5 with new reason text).
+
+  Wait — or... my own scripts? No, my scripts only read. Did any of my scripts write? No — all read-only json.load. Hmm, but wait — maybe the user (or another agent) is concurrently running the chain in the working folder. The brief said "Цепочка прогнана на копии и в рабочей папке, scored.json совпали" — past tense. But the file keeps changing?
+
+  Let me check current time and file mtimes across the folder to see if something is actively writing. Also re-verify the headline numbers NOW.
+
+  Actually hold on — could MY earlier reading have been of a partially-written file? The numbers I verified initially (decisions Counter etc.) matched the brief exactly. Now the file differs (size +33 KB). Maybe the user re-ran score.py after my review started (e.g., they fixed something). Or there's a background process.
+
+  Also the reason "длина цепи не указана — уточнить у продавца (5)" implies score.py CHANGED too — let me diff score.py now vs what I read earlier. The score.py I read had only three extender reason variants. A new variant "(5) длина цепи не указана" means a code change mid-review!
+
+  This is important to report: the folder is live; files are being modified during review. I should check mtimes, re-read score.py, and re-run the headline checks to see what changed. Let me look.
+
+• Файл `scored.json` изменился прямо во время ревью (размер вырос, новый текст причины, которого нет в прочитанном мной `score.py`). Проверяю, что происходит в папке.Thu Oct 29 22:42:30 CET 2026
+Oct 29 22:31:07 consensus_canon.py
+Oct 29 22:41:33 score.py
+Oct 29 22:42:27 scored.json
+1793310149 consensus_qty_cap3_half70.json
+1793310149 consensus_plan_cap3_half70.json
+1793310148 consensus_qty_cap3.json
+1793310148 consensus_qty_cap0.json
+1793310148 consensus_plan_cap3.json
+1793310148 consensus_plan_cap0.json
+1793310147 scored.json
+1793310142 items.json
+score.py md5: f9a48f1378985038717ac14ddf530e0c size: 20482
+есть ли новая причина: True
+.append((5, f"вес пары {w} г ≤ 20 (одна ≤ 10 г)") if (wk and w and w <= 20) else (0, f"вес серёг {w} г — тяжелее нормы или не подтверждён"))
+    elif it["seg"] in NECKSEG:
+        # 29.10 (ревью Codex): «延长链: 无» — удлинителя НЕТ; хвостовая цепочка 尾链 — регулировка есть
+        # 2-е ревью: только поле «延长链» с непустым значением (не «延长使用寿命», не обрезанное «延长» в конце); в названии — «延长链»
+        ex = re.search(r"延长链\t\n([^\n]*)", col)
+        ext = (bool(ex.group(1).strip()) and not re.match(r"\s*(无|没有|否|不|0\b)", ex.group(1))) if ex else has(r"延长链", t)
+        ext = ext or has(r"尾链", col + t)
+        q.append((5, "указан удлинитель цепи (регулировка)") if ext else (0, "удлинителя нет (延长链: 无) — длина фиксированная" if ex else "регулировка длины не указана — уточнить у продавца"))
+    elif it["seg"] == "брошь":   # 29.10: тяжёлая брошь тянет ткань
+        q.append((5, f"вес броши {w} г ≤ 25") if (wk and w and w <= 25) else (0, f"вес броши {w} г — тяжелее 25 г или не подтверждён"))
+    
+
+
+• The situation: the folder is LIVE — score.py was modified at 22:41:33 (during my review), scored.json regenerated at 22:42:27, and all plan JSONs at 22:42:48-49. Someone (the user or another agent) is applying fixes while I review. The comment in the new score.py says "2-е ревью: только поле «延长链» с непустым значением..." — they're fixing the exact extender false positives I found (or someone else's second review).
+
+  So my earlier verifications were against the previous build. The current build has new code. I need to:
+  1. Re-verify headline numbers on the CURRENT scored.json.
+  2. Re-check the extender rule fix (new regex `延长链\t\n([^\n]*)` on col only, plus title fallback).
+  3. Re-check whether other rules changed (diff score.py old vs new — I have the old content in context; new size 20482 vs 19074).
+  4. Also check what else changed — maybe size rule, variants rule too.
+
+  Important: my review should be against the current state, and I should note that files changed mid-review. Let me diff the score.py versions. I have the old one fully in context. Let me view the new one fully, then compare blocks. Also re-run headline checks on the new scored.json.
+
+  Let me update the todo list and proceed.
+
+• Папка живая: `score.py` переписан в 22:41, планы пересобраны в 22:42 — прямо во время ревью. Перечитываю актуальную версию и сверяю с прежней.
+
+score_before_codexfix.py
+score_before_fix29.py
+score_before_round3.py
+score_before_round4.py
+MD5 (score.py) = f9a48f1378985038717ac14ddf530e0c
+MD5 (score_before_round3.py) = 947711291d9f82373d758d8bad21f7f5
+Oct 29 13:18:06 score_before_codexfix.py
+Oct 29 22:30:56 score_before_round3.py
+score.py 20482
+score_before_codexfix.py 16463
+score_before_fix29.py 15682
+score_before_round3.py 18008
+score_before_round4.py 19074
+• There's a new `score_before_round4.py` (19074 bytes — exactly the size of the score.py I first read). So the user is now in "round 4": they saved the version I reviewed as score_before_round4.py and applied new fixes. My review of rules 1-5 was against round-3 code; current code is round-4. Let me diff score_before_round4.py vs score.py to see the round-4 changes, then re-verify everything on the new build.
+
+• Появился `score_before_round4.py` — версия, которую я ревьюил. Диффаю раунд 3 → 4 и перепроверяю всё на новом билде.5c5
+< import json, re, statistics as st
+---
+> import os, json, re, statistics as st
+113c113,114
+<     col = re.sub(r"商品评价\n[\d.]+.*?查看全部评价", "", d.get("colors") or "", flags=re.S)
+---
+>     # 29.10 (2-е ревью Codex): обрезанный отзыв (без «查看全部评价») вырезается до конца сохранённого текста
+>     col = re.sub(r"商品评价\n[\d.]+.*?(查看全部评价|$)", "", d.get("colors") or "", flags=re.S)
+121,122c122,126
+<     if it["seg"] in NECKSEG:
+<         sz = sz or bool(re.search(r"(链长|长度|周长)\t?\n?[^\n\d]{0,6}\d", col + t)) or any(int(v) >= 30 for v in re.findall(r"(\d+)\s*(?:cm|CM|厘米)", col + t))
+---
+>     ln = None
+>     if it["seg"] in NECKSEG:   # 29.10 (2-е ревью Codex): таблица 长×宽 — размер кулона/упаковки, а не длина цепи. Засчитывается как «размеры есть»
+>         # (так сформулирован критерий), но отсутствие длины цепи помечается; строгий режим STRICT_LEN=1 требует длину цепи
+>         ln = bool(re.search(r"(链长|长度|周长)\t?\n?[^\n\d]{0,6}\d", col + t)) or any(int(v) >= 30 for v in re.findall(r"(\d+)\s*(?:cm|CM|厘米)", col + t))
+>         sz = ln if os.environ.get("STRICT_LEN") == "1" else (sz or ln)
+126c130
+<     q.append((5, "вес и размеры есть в карточке 1688") if (wk and sz) else (0, "ожидает проверки: карточка восстановлена из черновика, размеры не сохранились" if restored else ("ожидает проверки: " + ("размеров нет в карточке" if wk else "вес — допущение, не из карточки"))))
+---
+>     q.append((5, "вес и размеры есть в карточке 1688" + ("" if ln is None or ln else "; длина цепи не указана — уточнить у продавца")) if (wk and sz) else (0, "ожидает проверки: карточка восстановлена из черновика, размеры не сохранились" if restored else ("ожидает проверки: " + ("размеров нет в карточке" if wk else "вес — допущение, не из карточки"))))
+132,133c136,139
+<         ex = re.search(r"延长链?\t?\n?([^\n]*)", col + "\n" + t)
+<         ext = bool(ex and not re.match(r"\s*(无|没有|否|0\b)", ex.group(1))) or has(r"尾链", col + t)
+---
+>         # 2-е ревью: только поле «延长链» с непустым значением (не «延长使用寿命», не обрезанное «延长» в конце); в названии — «延长链»
+>         ex = re.search(r"延长链\t\n([^\n]*)", col)
+>         ext = (bool(ex.group(1).strip()) and not re.match(r"\s*(无|没有|否|不|0\b)", ex.group(1))) if ex else has(r"延长链", t)
+>         ext = ext or has(r"尾链", col + t)
+138,139c144,146
+<         adj = has(r"可调|开口|活口|弹力|延长|伸缩|尾链", col + t) or (it["seg"] == "кольца набор" and bool(re.search(r"\d+号", col + t)))
+<         q.append((5, "регулировка размера указана (开口/可调/弹力/延长 или размеры)") if adj else (0, "регулировка размера не указана — уточнить у продавца"))
+---
+>         # 2-е ревью: «不可调节» — отрицание; «7号» — фиксированный размер кольца, а не регулировка
+>         adj = bool(re.search(r"(?<!不)可调|开口|活口|弹力|延长链|伸缩|尾链", col + t))
+>         q.append((5, "регулировка размера указана (开口/可调/弹力/延长链)") if adj else (0, "регулировка размера не указана — уточнить у продавца"))
+143c150,151
+<     mat = "材质" in col
+---
+>     # 2-е ревью Codex: сплав берётся и из det.material, но только металл (мусорные значения отсекаются)
+>     mat = "材质" in col or bool(re.search(r"合金|铜|钛钢|不锈钢|铁|银|金属", d.get("material") or ""))
+
+
+• Round-4 changes (made during my review, apparently from a parallel "2-е ревью Codex"):
+
+  1. Review cut: `商品评价\n[\d.]+.*?(查看全部评价|$)` — now cuts to end of text if no 查看全部评价. This fixes the 61 leftovers. ✓ addresses my finding.
+
+  2. Size for necklaces: `ln` (chain length) tracked separately; default mode sz = sz or ln (lenient), STRICT_LEN=1 requires chain length. Reason text now appends "; длина цепи не указана". OK — parameterized.
+
+  3. Extender: new regex `延长链\t\n([^\n]*)` on col ONLY (requires the tab-newline param format — avoids dangling 延长 and title prose). Value must be non-empty and not 无|没有|否|不|0. Fallback: has 延长链 in title. Plus 尾链 anywhere. This fixes №15/94/1031/1174/1334/1475-type false positives (pipe-dump keys) — but note: now REQUIRES format "延长链\t\n" — cards with "延长链：无" same-line (fullwidth colon) won't match ex → falls to "не указана" → 0. And value 不 added to negatives. Need re-check №291 (браслет — handled by adj rule) and the previously confirmed cases.
+
+  4. Bracelet/rings adj: `(?<!不)可调` (negative lookbehind for 不可调） and `延长` → `延长链` (so "延长使用寿命" prose no longer matches); removed the `\d+号` ring-size criterion (7号 = fixed size, not adjustability). Fixes №291-type.
+
+  5. Material: mat also from det.material with metal filter.
+
+  Now re-verify everything on the new build:
+  - Headline numbers (decisions, zeros, plans).
+  - №94/291/665 etc. fixed?
+  - New false positives from `延长链\t\n` strictness?
+  - The new scored.json / plan JSONs — re-verify totals.
+  - Also check whether STRICT_LEN default was used in the current scored.json (env not set → lenient).
+
+  Also important: the plan JSONs were re-dumped at 22:42:48 — after scored.json at 22:42:27. Need to re-verify headline numbers on current files. And check consensus_canon.py unchanged (mtime 22:31 — before round 4; fine since scored.json fields unchanged in structure).
+
+  Let me re-run the full verification battery on current files.
+
+• Перепроверяю всё на актуальном билде (раунд 4).n = 1485
+decisionCANON: Counter({'тест 20–30 шт': 689, 'оплатить': 369, 'не брать (баллы < 55)': 341, 'не брать (цена не подтверждена)': 72, 'не брать (стоп-фактор)': 11, 'не брать (дубль №1133)': 1, 'не брать (дубль №273)': 1, 'не брать (дубль №106)': 1})
+качество 0: 324
+комплектность 0: 1065
+cap0: карточек 964, поштучно ¥213776, наборы ¥1887, ИТОГО ¥215663
+cap3: карточек 446, поштучно ¥157687, наборы ¥1887, ИТОГО ¥159574
+cap3_half70: карточек 446, поштучно ¥115127, наборы ¥1887, ИТОГО ¥117014
+15 А2/Б колье|подвеска+серьги кач 5 | регулировка длины не указана — уточнить у продавца (0)
+94 А2/Б колье|подвеска+серьги кач 0 | регулировка длины не указана — уточнить у продавца (0)
+1031 А2/Б колье|подвеска+серьги кач 5 | регулировка длины не указана — уточнить у продавца (0)
+1174 А2/Б колье|подвеска+серьги кач 0 | регулировка длины не указана — уточнить у продавца (0)
+1334 А2/Б колье|подвеска+серьги кач 5 | регулировка длины не указана — уточнить у продавца (0)
+1475 А4 набор 4+ кач 0 | регулировка длины не указана — уточнить у продавца (0)
+291 браслет кач 5 | регулировка размера не указана — уточнить у продавца (0)
+665 А2/Б колье|подвеска+серьги кач 0 | регулировка длины не указана — уточнить у продавца (0)
+995 колье кач 5 | удлинителя нет (延长链: 无) — длина фиксированная (0)
+1163 чокер кач 10 | удлинителя нет (延长链: 无) — длина фиксированная (0)
+1172 чокер кач 10 | удлинителя нет (延长链: 无) — длина фиксированная (0)
+1184 бусы кач 0 | удлинителя нет (延长链: 无) — длина фиксированная (0)
+965 чокер кач 5 | указан удлинитель цепи (регулировка) (5)
+364 брошь кач 0 | вес броши 30 г — тяжелее 25 г или не подтверждён (0)
+остатки отзывов: 0 | ключевые слова в отзывах: []
+
+
+• Round-4 build:
+  - Extender false positives fixed (№15/94/1031/1174/1334/1475 now 0; note №965 still +5 via 尾链 — correct).
+  - №291 fixed (0 now).
+  - №665 fixed.
+  - Review leftovers: 0.
+  - 无 handling still correct (995, 1163, 1172, 1184 = 0).
+
+  BUT headline numbers changed MASSIVELY:
+  - оплатить 369 (was 459), тест 689 (was 636), не брать 424 (341+72+11)...
+  - качество 0: 324 (was 137!) — the material change (`材质 in col OR det.material metal`) — wait that should INCREASE мат. кач 0 nearly tripled — because... the extender rule got STRICTER (ex requires exact 延长链\t\n format) → many neck items lost +5. Also sz? In lenient mode sz unchanged. мат broadened → more +5. So кач-0 jump 137→324 is from extender strictness.
+  - Plans: cap0 ¥215 663 / 964 cards (was 248 472/996); cap3 ¥159 574/446; cap3_half70 ¥117 014/446.
+
+  So the "Результат" section in the brief now matches NOTHING. The brief's numbers were the 22:32 build. The current build (22:42) has different numbers. Also 996→964, 517→446 cards.
+
+  Wait — also 'не брать (баллы < 55)' 341 vs 303, 'цена не подтверждена' 72 vs 73, тест 689 vs 636. The shifts are due to score changes (mostly extender -5 for necklaces without exact 延长链 param, -5 for bracelets without 延长链... and +мат for some).
+
+  Hmm wait — кач 0 324: ext now requires exact param format; previously `延长` matched widely (e.g. "长度可调" descriptions, 延长 in prose). Many neck items lost the +5. Also adj now 延长链 instead of 延长 for bracelets.
+
+  The brief asked "Совпадают ли цифры выше с scored.json и consensus_plan_cap*.json" — at the time of my first check (22:32-ish build) YES; now NO. I must report both: numbers were consistent with the 22:32 build; the current 22:42 build (round 4) has materially different numbers — оплатить 369/тест 689, кач-0 324, ИТОГО cap3_half70 ¥117 014/446. The brief's result section is stale relative to current files.
+
+  Also note: decisionCANON Counter now: 369+689+341+72+11+3 дубля = 1485. ✓
+
+  Also check the new extender rule for NEW false negatives/positives:
+  1. `延长链\t\n` exact format — cards where param is "延长链：无" same-line or "延长链\n无" (without tab) → ex None → falls to title check → 0. Previously 无 correctly identified. Any card with "延长链\n无" (no tab)? The pipe-dump cards had "延长链|" — not matched → now 0 (fine, ambiguous). Cards with legit "延长链\t\n10cm" → matched ✓. Let me count how many neck items now have ex with non-empty value and their values; and check values like "可调节" / "有" / "是" — not in negative list → +5. OK.
+  2. Negative list now includes 不 — "不" first char: value "不含" hmm. "不限" — rare. Also "0\b" — "01"? fine.
+  3. 尾链 has() unchanged — still matches variant names like №965 尾链款 (correct there) — but also could match "无尾链" (no tail chain)! `has(r"尾链", ...)` — "无尾链" contains 尾链 → ext=True — FALSE POSITIVE if a card says 无尾链. Let me scan for 无尾链.
+  4. STRICT_LEN default off — lenient; the "; длина цепи не указана" annotation only.
+  5. New мат rule: `re.search(r"合金|铜|钛钢|不锈钢|铁|银|金属", d.get("material") or "")` — det.material is a separate field? Check items have det.material. "银" alone — "925银针" silver needle — hmm material contains 银 → мат=True even if the item is resin with silver pin? For earrings "925银针" common. метод says "указан сплав" — silver pin is arguably not the body alloy. Minor.
+
+  Also the size base rule: STRICT_LEN off → unchanged behavior plus annotation. But note: annotation "; длина цепи не указана" appended even when sz came from 长×宽 table (packaging/pendant size) — that's the intent.
+
+  Now also re-verify: plans on new build — the earlier per-item verification code logic still holds; re-check №114 qty claim and "16 позиций только для наборов" on the new qty files; HALF70 range check; check ровно-70 stats. Also sets component claim unchanged (sets unchanged).
+
+  Also verify quality-0 reasons distribution on new build to explain 324.
+
+  And check new false negatives for extender: count neck items where ext reason = "не указана" but colors contain 延长链 in other formats (e.g. "延长链：有" same line, "延长链\n有" without tab, "延长链\t有" tab no newline). Let me scan all 延长链 occurrences with following 20 chars to enumerate formats and see which the new regex misses.
+
+• Новый билд меняет цифры существенно. Проверяю новое правило удлинителя на пропуски и остальные детали раунда 4.форматы 延长链: [('延长链\t', 10), ('延长链', 7), ('延长链，可以自由', 1), ('延长链长度可调，', 1), ('延长链6cm', 1), ('延长链。长短松紧', 1), ('延长链、（铜镀白', 1)]
+не матчатся новым regex: 22
+(15, '延长链')
+(94, '延长链')
+(364, '延长链\t')
+(498, '延长链\t')
+(574, '延长链\t')
+(665, '延长链，可以自由调节佩戴周长，')
+(690, '延长链长度可调，穿戴便捷')
+(735, '延长链6cm')
+(846, '延长链。长短松紧可以自行调整。')
+(848, '延长链\t')
+(995, '延长链\t')
+(1031, '延长链')
+(1148, '延长链\t')
+(1163, '延长链\t')
+(1172, '延长链\t')
+(1174, '延长链')
+(1174, '延长链')
+(1184, '延长链\t')
+(1330, '延长链\t')
+(1334, '延长链')
+246 ожидает проверки: размеров нет в карточке (0)
+78 ожидает проверки: вес — допущение, не из карт
+
+det.material есть у 1460 [(1, '合金'), (3, '不锈钢')]
+
+
+• Very important finding! The new extender regex `延长链\t\n` requires tab-NEWLINE after 延长链. But the actual param format in col is `延长链\t` followed by... wait. Let me look at the format list:
+
+  - '延长链\t' ×10 — the regex `re.finditer(r"延长链[^\n]{0,12}")` captured "延长链\t" + next chars until newline... hmm, actually `[^\n]{0,12}` captured "延长链\t" — meaning after 延长链 comes \t then NEWLINE immediately? No — `[^\n]{0,12}` would capture more non-newline chars if present. "延长链\t" as the FULL match means after \t there's \n. So format is "延长链\t\n<value>". Wait but then the new regex `延长链\t\n([^\n]*)` WOULD match these!
+
+  Hold on — the formats Counter shows keys truncated to 8 chars: `frag[:8]`. '延长链\t' is 延长链 + \t = 4+1... "延长链\t" printed with repr? No, printed raw. The key '延长链\t' means frag starts 延长链-tab and the 8-char prefix is exactly 延长链\t (tab = 1 char). So chars 5-8 after 延长链... the prefix is 8 chars: 延长链（4) + \t(1) + 3 more chars? Printed '延长链\t' shows tab then... hmm actually in output it shows literally `延长链\t` — that's 延长链 + tab character

@@ -29,6 +29,18 @@ def thumb(n):
     im = Image.open(p).convert("RGB"); im.thumbnail((72, 72)); b = io.BytesIO(); im.save(b, "JPEG", quality=70)
     return base64.b64encode(b.getvalue()).decode()
 
+PH = "../критерии_2026-10-28/ревью_плана/логика_ROI_фото"   # 30.10: крупные фото для окна с приближением (рядом с HTML)
+def big(job):
+    src, dst = job
+    if os.path.exists(dst): return
+    im = Image.open(src).convert("RGB"); im.thumbnail((1000, 1000)); im.save(dst, "JPEG", quality=80)
+def photos():
+    from concurrent.futures import ThreadPoolExecutor
+    os.makedirs(PH, exist_ok=True)
+    jobs = [(src, f"{PH}/{i + 1:04d}_{k + 1}.jpg") for i, r in enumerate(s) for k, src in enumerate(p for p in r.get("imgs") or [] if os.path.exists(p))]
+    with ThreadPoolExecutor(8) as pl: list(pl.map(big, jobs))
+photos()
+
 cache, rows_out = {}, []
 for i, r in enumerate(s):
     n = i + 1; st_ = con[str(n)]["основной"]; qs, _ = group(r["seg"], st_)
@@ -48,7 +60,7 @@ for i, r in enumerate(s):
         q0=qs[0] if qs else r["seg"], hot=len(hot), ok=len(okr), fresh=fr, med=med, Pm=round(Pm) if Pm else None,
         rm=roi(Pm, inv) if Pm else None, rn=roi(need, inv), hr=r.get("headroom"), total=r["total"],
         R=r["R"], stops=r["stops"], dec=r["decisionCANON"], why=r["whyCANON"], eye=r.get("eye"), hit=n in HIT,
-        plan={k: PLAN[k].get(str(n)) for k in PLAN}, qty=QTY.get(str(n), 0), img=thumb(n)))
+        plan={k: PLAN[k].get(str(n)) for k in PLAN}, qty=QTY.get(str(n), 0), img=thumb(n), ph=sum(os.path.exists(p) for p in r.get("imgs") or [])))
 
 # место в группе «рынок × стиль» для тестов (как в consensus_canon.py)
 T = defaultdict(list)

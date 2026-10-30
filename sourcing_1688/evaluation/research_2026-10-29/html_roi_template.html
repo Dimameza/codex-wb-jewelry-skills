@@ -46,16 +46,32 @@ ol.chain{margin:0;padding-left:20px}ol.chain li{margin:3px 0}
 .formula{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;overflow-x:auto}
 .grp{margin:18px 0 6px;font-weight:600}
 a{color:var(--acc)}
+summary img{cursor:zoom-in}
+.phs{display:flex;gap:8px;flex-wrap:wrap}.phs img{width:120px;height:120px;object-fit:cover;border-radius:8px;cursor:zoom-in;background:var(--chip);border:1px solid var(--line)}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;z-index:50;touch-action:none;user-select:none}
+#lb.on{display:block}
+#lb .st{position:absolute;inset:0;overflow:hidden;cursor:grab}#lb .st.drag{cursor:grabbing}
+#lb img{position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;will-change:transform}
+#lb .tb{position:absolute;left:0;right:0;bottom:0;display:flex;gap:8px;justify-content:center;align-items:center;padding:12px;color:#eee;font-size:13px;background:linear-gradient(transparent,rgba(0,0,0,.6))}
+#lb button{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:8px;min-width:38px;height:36px;font:inherit;font-size:16px;cursor:pointer}
+#lb button:hover{background:rgba(255,255,255,.26)}
+#lb .x{position:absolute;top:12px;right:12px}
+#lb .cap{position:absolute;top:14px;left:16px;right:64px;color:#eee;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#lb .nav{position:absolute;top:50%;transform:translateY(-50%)}#lb .prev{left:12px}#lb .next{right:12px}
+#lb .lo{color:#bbb;font-size:12px}
 @media (max-width:640px){details.it>summary{grid-template-columns:44px auto 1fr;}.kpi{grid-column:1/-1;justify-content:flex-start}}
 </style>
 </head>
 <body>
 <header>
 <h1>Логика ROI и решений: 1 485 позиций бижутерии с 1688</h1>
-<p class="sub">Канон юнит-экономики ①…⑨, данные на 30.10.2026. Раскройте позицию, чтобы увидеть расчёт ROI и причину решения.</p>
+<p class="sub">Канон юнит-экономики ①…⑨, данные на 30.10.2026. Раскройте позицию, чтобы увидеть расчёт ROI и причину решения. Нажмите на фото, чтобы открыть его крупно: колесо или щипок приближают, перетаскивание сдвигает.</p>
 </header>
 <nav id="tabs"></nav>
 <main id="main"></main>
+<div id="lb" role="dialog" aria-label="Фото"><div class="st"><img alt=""></div><div class="cap"></div><button class="x" title="Закрыть (Esc)">✕</button>
+<button class="nav prev" title="Предыдущее фото (←)">‹</button><button class="nav next" title="Следующее фото (→)">›</button>
+<div class="tb"><button data-z="-1" title="Отдалить (−)">−</button><span class="pct">100 %</span><button data-z="1" title="Приблизить (+)">+</button><button data-z="0" title="Вписать (0)">⤢</button><span class="lo"></span></div></div>
 <script>
 const D=/*DATA*/null;
 const I=D.items, byN={}; I.forEach(x=>byN[x.n]=x);
@@ -109,7 +125,7 @@ function list(t){
 }
 function row(x){
  const p=rec(x), roiM=x.rm?x.rm[3]:null;
- return `<details class="it" data-n="${x.n}"><summary>${x.img?`<img src="data:image/jpeg;base64,${x.img}" alt="">`:'<div class="ph"></div>'}<span class="num">№${x.n}</span>
+ return `<details class="it" data-n="${x.n}"><summary>${x.img?`<img src="data:image/jpeg;base64,${x.img}" alt="" data-lb="${x.n}" title="Открыть фото">`:'<div class="ph"></div>'}<span class="num">№${x.n}</span>
  <span class="nm">${esc(x.name)}<br><small>${esc(x.seg)} · ${esc(x.style)} · заказ «${esc(x.order)}», стр. ${x.row}</small></span>
  <span class="kpi"><span class="chip">¥${dec(x.cny)}</span><span class="chip">${x.total} балл.</span><span class="chip">ROI ${roiM==null?'—':roiM+' %'}</span><span class="chip">запас ×${dec(x.hr)}</span>
  <span class="b ${decCls(x.dec)}">${esc(x.dec)}</span><span class="b ${planCls(p&&p[0])}">${p?esc(p[0])+(p[1]?' · '+p[1]+' шт':''):'вне плана'}</span></span></summary><div class="body"></div></details>`;
@@ -165,7 +181,7 @@ function planWhy(x,k,cap){
 function body(x){
  const crit=Object.entries(x.R), max={'спрос':20,'читаемость':20,'профиль':20,'повод':15,'качество':15,'комплектность':10};
  const setNote=x.qty>(rec(x)?rec(x)[1]:0)?`<p>В рекомендованном варианте ещё ${x.qty-(rec(x)?rec(x)[1]:0)} шт идут в наборы «колье + серьги»; итого к закупке ${x.qty} шт.</p>`:'';
- return `<h4>Почему такое решение</h4>${chain(x)}
+ return `<div class="phs">${phs(x)}</div><h4>Почему такое решение</h4>${chain(x)}
  <h4>Расчёт ROI</h4>${roiTable(x)}
  <h4>Варианты закупки</h4><div class="wrap"><table><tr><th>Вариант</th><th>Решение</th><th>Почему</th></tr>
  <tr><td>Рекомендованный</td><td>${esc(rec(x)?rec(x)[0]:'—')}</td><td>${planWhy(x,'cap3_half70',3)}</td></tr>
@@ -202,6 +218,38 @@ function how(){
  <p class="m">Медиана ROI на рынке среди «оплатить»: ${(()=>{const v=I.filter(x=>x.dec==='оплатить'&&x.rm).map(x=>x.rm[3]).sort((a,b)=>a-b);return v[v.length>>1]})()} %. Источники: scored.json, consensus_plan_cap*.json, наборы_серьги/final_sets_canon.json; генератор — оценка_2026-10-28/html_roi.py.</p>
  </div>`;
 }
+function phs(x){let h='';for(let k=1;k<=Math.max(x.ph,1);k++)h+=`<img src="${bigSrc(x.n,k)}" data-lb="${x.n}" data-k="${k}" alt="" onerror="this.onerror=null;this.src='data:image/jpeg;base64,${x.img}'">`;return h}
+const bigSrc=(n,k)=>`логика_ROI_фото/${String(n).padStart(4,'0')}_${k}.jpg`;
+// окно фото: колесо и щипок — приближение к точке, перетаскивание — сдвиг, двойной клик — ×2,5 / вписать
+const LB=document.getElementById('lb'), ST=LB.querySelector('.st'), IM=LB.querySelector('img');
+let lb={n:0,k:1,s:1,fit:1,x:0,y:0};
+function apply(){IM.style.transform=`translate(${lb.x}px,${lb.y}px) scale(${lb.s})`;LB.querySelector('.pct').textContent=Math.round(lb.s/lb.fit*100)+' %'}
+function fitImg(){const W=ST.clientWidth,H=ST.clientHeight,w=IM.naturalWidth||1,h=IM.naturalHeight||1;lb.fit=lb.s=Math.min(W/w,H/h)*.94;lb.x=(W-w*lb.s)/2;lb.y=(H-h*lb.s)/2;apply()}
+function zoomAt(f,cx,cy){const ns=Math.min(Math.max(lb.s*f,lb.fit*.5),lb.fit*12);lb.x=cx-(cx-lb.x)*ns/lb.s;lb.y=cy-(cy-lb.y)*ns/lb.s;lb.s=ns;apply()}
+function openLb(n,k){const x=byN[n];lb.n=n;lb.k=k||1;IM.onload=fitImg;
+ IM.onerror=()=>{IM.onerror=null;IM.src='data:image/jpeg;base64,'+x.img;LB.querySelector('.lo').textContent='крупное фото не найдено рядом с HTML — показана миниатюра'};
+ LB.querySelector('.lo').textContent='';IM.src=bigSrc(n,lb.k);
+ LB.querySelector('.cap').textContent=`№${n} · ${x.name}`+(x.ph>1?` · фото ${lb.k} из ${x.ph}`:'');
+ LB.querySelectorAll('.nav').forEach(b=>b.style.display=x.ph>1?'':'none');LB.classList.add('on')}
+function closeLb(){LB.classList.remove('on');IM.removeAttribute('src')}
+function step(d){const x=byN[lb.n];if(x.ph>1)openLb(lb.n,(lb.k-1+d+x.ph)%x.ph+1)}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-lb]');if(!t)return;e.preventDefault();e.stopPropagation();openLb(+t.dataset.lb,+(t.dataset.k||1))},true);
+LB.querySelector('.x').onclick=closeLb;LB.querySelector('.prev').onclick=()=>step(-1);LB.querySelector('.next').onclick=()=>step(1);
+LB.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{const z=+b.dataset.z,W=ST.clientWidth/2,H=ST.clientHeight/2;z?zoomAt(z>0?1.5:1/1.5,W,H):fitImg()});
+ST.addEventListener('click',e=>{if(e.target===ST&&!moved)closeLb()});
+ST.addEventListener('wheel',e=>{e.preventDefault();const r=ST.getBoundingClientRect();zoomAt(Math.exp(-e.deltaY*.0015),e.clientX-r.left,e.clientY-r.top)},{passive:false});
+ST.addEventListener('dblclick',e=>{const r=ST.getBoundingClientRect();lb.s>lb.fit*1.05?fitImg():zoomAt(2.5,e.clientX-r.left,e.clientY-r.top)});
+const P=new Map();let moved=false,pinch=null,last=null;
+ST.addEventListener('pointerdown',e=>{ST.setPointerCapture(e.pointerId);P.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=false;ST.classList.add('drag');
+ if(P.size===2){const [a,b]=[...P.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y)}}else last={x:e.clientX,y:e.clientY}});
+ST.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;P.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(P.size===2&&pinch){const [a,b]=[...P.values()],d=Math.hypot(a.x-b.x,a.y-b.y),r=ST.getBoundingClientRect();zoomAt(d/pinch.d,(a.x+b.x)/2-r.left,(a.y+b.y)/2-r.top);pinch.d=d;moved=true}
+ else if(last){const dx=e.clientX-last.x,dy=e.clientY-last.y;if(Math.abs(dx)+Math.abs(dy)>2)moved=true;lb.x+=dx;lb.y+=dy;last={x:e.clientX,y:e.clientY};apply()}});
+const up=e=>{P.delete(e.pointerId);if(P.size<2)pinch=null;if(!P.size){last=null;ST.classList.remove('drag')}else{const v=[...P.values()][0];last={x:v.x,y:v.y}}};
+ST.addEventListener('pointerup',up);ST.addEventListener('pointercancel',up);
+document.addEventListener('keydown',e=>{if(!LB.classList.contains('on'))return;const W=ST.clientWidth/2,H=ST.clientHeight/2;
+ if(e.key==='Escape')closeLb();else if(e.key==='+'||e.key==='=')zoomAt(1.5,W,H);else if(e.key==='-')zoomAt(1/1.5,W,H);else if(e.key==='0')fitImg();else if(e.key==='ArrowLeft')step(-1);else if(e.key==='ArrowRight')step(1)});
+addEventListener('resize',()=>{if(LB.classList.contains('on'))fitImg()});
 nav();show();
 </script>
 </body>

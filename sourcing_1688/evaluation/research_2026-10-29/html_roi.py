@@ -47,6 +47,7 @@ AW = json.load(open("analogs_wb.json")); EM = np.load("analogs_emb.npz"); WBI = 
 SIM = np.maximum(EM["ours"] @ EM["wb"].T, EM["ours34"] @ EM["wb"].T)   # косинус CLIP, 1485 × карточки WB (фото целиком и обрезанное до 3:4)
 ORB = json.load(open("analogs_orb.json"))   # копии: совпадение точек фото ORB + RANSAC (analogs_orb.py); ≥30 — то же фото, 10–29 — похожая модель
 COPY, NEAR = 30, 10
+MT = json.load(open("metal.json")); OPP = {"gold": "silver", "silver": "gold"}
 EYEA = json.load(open("eye_analogs/eye_analogs.json")) if os.path.exists("eye_analogs/eye_analogs.json") else {}   # 30.10: аналоги проверены глазами (0 далеко, 1 близко, 2 та же вещь)
 USED = set()
 def card(nm, i):
@@ -57,14 +58,17 @@ def pct(v, q): return v[min(len(v) - 1, int(q * len(v)))] if v else None
 
 cache, rows_out = {}, []
 for i, r in enumerate(s):
-    n = i + 1; st_ = con[str(n)]["основной"]; qs, _ = group(r["seg"], st_)
-    if st_ == "SCULPT" and sk(r["seg"]): key = ("S", sk(r["seg"])); qs = [f"скульптурное золото — {sk(r['seg'])} (аналоги глазами)"]
+    n = i + 1; st_ = con[str(n)]["основной"]; qs, _ = group(r["seg"], st_); mt = r.get("metal")   # 30.10: рынок того же металла (price_check_canon.py METAL=1)
+    if st_ == "SCULPT" and sk(r["seg"]) and mt != "silver": key = ("S", sk(r["seg"])); qs = [f"скульптурное золото — {sk(r['seg'])} (аналоги глазами)"]
     else: key = ("Q",) + tuple(qs)
     if key not in cache: cache[key] = SCP[key[1]] if key[0] == "S" else pool(qs)
-    rows = cache[key]; pack = 20 if r["seg"] in SETS else 0
+    rows = cache[key]
+    if mt in OPP: rows = [x for x in rows if MT["wb"].get(str(x["nm"])) != OPP[mt]]
+    pack = 20 if r["seg"] in SETS else 0
     inv = 12.72 * r["cny"] + 22 + 0.285 * r["w"] + pack; need = (inv * CF["k"] - CF["b"]) / (CF["a"] - DRR); thr = need * (1 - SPP)
     assert round(need) == r["need_canon"], n
     hot = sorted(x["price"] for x in rows if x["orders30"] >= 30); med = hot[len(hot) // 2] if hot else None
+    assert r["headroom"] == (round(med / thr, 2) if med else None), n
     okr = [x for x in rows if x["orders30"] >= 30 and x["price"] >= thr]; fr = sum((x.get("rating_cnt") or 0) < 100 for x in okr)
     Pm = med / (1 - SPP) if med else None
     hotr = [x for x in rows if x["orders30"] >= 30]
@@ -81,9 +85,9 @@ for i, r in enumerate(s):
         yuan=round(12.72 * r["cny"]), cargo=round(0.285 * r["w"]), inv=round(inv), need=round(need), thr=round(thr),
         q0=qs[0] if qs else r["seg"], hot=len(hot), ok=len(okr), fresh=fr, med=med, Pm=round(Pm) if Pm else None,
         rm=roi(Pm, inv) if Pm else None, rn=roi(need, inv), hr=r.get("headroom"), total=r["total"],
-        R=r["R"], stops=r["stops"], dec=r["decisionCANON"], why=r["whyCANON"], eye=r.get("eye"), hit=n in HIT,
+        metal=mt, R=r["R"], stops=r["stops"], dec=r["decisionCANON"], why=r["whyCANON"], eye=r.get("eye"), hit=n in HIT,
         plan={k: PLAN[k].get(str(n)) for k in PLAN}, qty=QTY.get(str(n), 0), img=thumb(n), ph=sum(os.path.exists(p) for p in r.get("imgs") or []),
-        dist=[pct(hot, q) for q in (0, .25, .5, .75)] + [hot[-1] if hot else None], an=an, cp=cp, like=like, top=top, nwb=len(AW), eyea=EYEA.get(str(n)), psrc=r["psrc"], P0=r["P"], qs=qs))
+        dist=[pct(hot, q) for q in (0, .25, .5, .75)] + [hot[-1] if hot else None], an=an, cp=cp, like=like, top=top, nwb=len(AW), eyea=(lambda e: e if e and e.get("an") == [c["nm"] for c in an[:3]] else None)(EYEA.get(str(n))), psrc=r["psrc"], P0=r["P"], qs=qs))
 
 # место в группе «рынок × стиль» для тестов (как в consensus_canon.py)
 T = defaultdict(list)

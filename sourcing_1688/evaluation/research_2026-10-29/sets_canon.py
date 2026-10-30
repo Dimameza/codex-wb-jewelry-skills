@@ -9,14 +9,18 @@ os.chdir(_c)
 CF = json.load(open(f"{E}/canon_fit.json")); SPP, DRR = 0.35, 0.10
 s = json.load(open(f"{E}/scored.json")); F = json.load(open(f"{W0}/final_sets.json"))
 sets = [x for x in pool(["комплект бижутерии колье и серьги", "комплект бижутерии женский", "набор бижутерии колье серьги браслет"]) if x["orders30"] >= 30]
-hot = sorted(x["price"] for x in sets); med = hot[len(hot) // 2]
+ALL = sets
+# 30.10: METAL=1 — рынок наборов того же цвета металла, что колье набора (как в price_check_canon.py)
+METAL = os.environ.get("METAL") == "1"; MT = json.load(open(f"{E}/metal.json")) if METAL else None; OPP = {"gold": "silver", "silver": "gold"}
 W = lambda r: r["w"] if isinstance(r["w"], (int, float)) else 30
 for c in F:
-    a, b = s[c["neck"] - 1], s[c["ear"] - 1]
+    a, b = s[c["neck"] - 1], s[c["ear"] - 1]; mt = MT["ours"][str(c["neck"])] if METAL else None
+    sets = [x for x in ALL if MT["wb"].get(str(x["nm"])) != OPP[mt]] if mt in OPP else ALL
+    hot = sorted(x["price"] for x in sets); med = hot[len(hot) // 2]
     inv = 12.72 * c["cny"] + 22 + 0.285 * (W(a) + W(b)) + 20
     need = (inv * CF["k"] - CF["b"]) / (CF["a"] - DRR); thr = need * (1 - SPP)
     ok = [x for x in sets if x["price"] >= thr]; fr = sum((x.get("rating_cnt") or 0) < 100 for x in ok)
-    c.update(need_canon=round(need), thr_canon=round(thr), market_canon=len(ok), fresh_canon=fr, ok_canon=len(ok) >= 5 and fr >= 1, headroom=round(med / thr, 2))
+    c.update(metal=mt, need_canon=round(need), thr_canon=round(thr), market_canon=len(ok), fresh_canon=fr, ok_canon=len(ok) >= 5 and fr >= 1, headroom=round(med / thr, 2))
 json.dump(F, open(f"{W0}/final_sets_canon.json", "w"), ensure_ascii=False, indent=1)
 print("наборов", len(F), "проходят по канону", sum(c["ok_canon"] for c in F), "медиана рынка", med, "нужная цена: было/стало (медиана)",
       sorted(c["need"] for c in F)[len(F) // 2], sorted(c["need_canon"] for c in F)[len(F) // 2])

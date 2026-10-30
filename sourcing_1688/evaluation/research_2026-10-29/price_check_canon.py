@@ -16,13 +16,21 @@ SETS = {"А2/Б колье|подвеска+серьги", "А3 набор 3", "
 sk = lambda seg: "набор" if seg in SETS else "колье" if seg in ("колье", "чокер", "подвеска") else "серьги" if seg == "серьги" else None
 W = lambda r: r["w"] if isinstance(r["w"], (int, float)) else 30
 def need_canon(cny, w, pack): inv = 12.72 * cny + 22 + 0.285 * w + pack; return (inv * CF["k"] - CF["b"]) / (CF["a"] - DRR), inv
+# 30.10 (проверка аналогов глазами): METAL=1 — рынок того же цвета металла. Золотой позиции не засчитываются карточки WB, размеченные
+# как серебро, серебряной — как золото (metal.py: описания/названия, иначе CLIP); «прочее» (жемчуг, бусы, шнур) остаётся в обеих.
+# Серебряная позиция в стиле SCULPT проверяется по своей обычной группе запросов, а не по пулу скульптурного золота.
+METAL = os.environ.get("METAL") == "1"
+if METAL: MT = json.load(open("metal.json")); OPP = {"gold": "silver", "silver": "gold"}
 cache, out = {}, Counter()
 for i, r in enumerate(s):
     st_ = con[str(i + 1)]["основной"]; qs, _ = group(r["seg"], st_)
-    if st_ == "SCULPT" and sk(r["seg"]): key = ("S", sk(r["seg"])); qs = [f"скульптурное золото — {sk(r['seg'])} (аналоги глазами)"]
+    mt = MT["ours"][str(i + 1)] if METAL else None
+    if st_ == "SCULPT" and sk(r["seg"]) and mt != "silver": key = ("S", sk(r["seg"])); qs = [f"скульптурное золото — {sk(r['seg'])} (аналоги глазами)"]
     else: key = ("Q",) + tuple(qs)
     if key not in cache: cache[key] = SCP[key[1]] if key[0] == "S" else pool(qs)
-    rows = cache[key]; need, inv = need_canon(r["cny"], W(r), 20 if r["seg"] in SETS else 0); thr = need * (1 - SPP)
+    rows = cache[key]
+    if METAL and mt in OPP: rows = [x for x in rows if MT["wb"].get(str(x["nm"])) != OPP[mt]]
+    r["metal"] = mt; need, inv = need_canon(r["cny"], W(r), 20 if r["seg"] in SETS else 0); thr = need * (1 - SPP)
     ok_rows = [x for x in rows if x["orders30"] >= 30 and x["price"] >= thr]; fr = [x for x in ok_rows if (x.get("rating_cnt") or 0) < 100]
     hot = sorted(x["price"] for x in rows if x["orders30"] >= 30); med = hot[len(hot) // 2] if hot else None
     ok = len(ok_rows) >= 5 and len(fr) >= 1

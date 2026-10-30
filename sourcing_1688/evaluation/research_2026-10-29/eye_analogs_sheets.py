@@ -15,7 +15,8 @@ def tile(p, lab, col):
     d = ImageDraw.Draw(t); d.rectangle([0, 0, C - 1, C - 1], outline=col, width=4 if col != "#ccc" else 1)
     d.rectangle([0, 0, 12 + 13 * len(lab), 28], fill=col); d.text((5, 2), lab, fill="white" if col != "#ccc" else "black", font=FT)
     return t
-items = [x for x in D["items"] if x["an"]]
+ONLY = os.environ.get("ONLY"); PFX = os.environ.get("PFX", "sheet")   # 30.10: повторная проверка только изменившихся позиций (после METAL=1)
+items = [x for x in D["items"] if x["an"] and (not ONLY or x["n"] in set(json.load(open(ONLY))))]
 idx = {}
 for k in range(0, len(items), PER):
     sh = Image.new("RGB", (2 * 4 * C + 20, 8 * C), "#888"); part = items[k:k + PER]
@@ -24,7 +25,7 @@ for k in range(0, len(items), PER):
         sh.paste(tile(f"{H}логика_ROI_фото/{x['n']:04d}_1.jpg", f"{x['n']}", "#d02020"), (X, Y))
         for m, c in enumerate(x["an"][:3]):
             sh.paste(tile(f"{H}логика_ROI_фото/wb/{c['nm']}.jpg", "abc"[m], "#ccc"), (X + (m + 1) * C, Y))
-    name = f"sheet_{k // PER + 1:03d}.jpg"; sh.save(f"{O}/{name}", quality=85)
+    name = f"{PFX}_{k // PER + 1:03d}.jpg"; sh.save(f"{O}/{name}", quality=85)
     idx[name] = [dict(n=x["n"], seg=x["seg"], an=[c["nm"] for c in x["an"][:3]]) for x in part]
-json.dump(idx, open(f"{O}/index.json", "w"), ensure_ascii=False)
+json.dump(idx, open(f"{O}/{'index' if PFX == 'sheet' else 'index_' + PFX}.json", "w"), ensure_ascii=False)
 print("листов", len(idx), "позиций", len(items))

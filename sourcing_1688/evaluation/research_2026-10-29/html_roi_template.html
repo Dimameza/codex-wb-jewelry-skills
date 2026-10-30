@@ -47,6 +47,13 @@ ol.chain{margin:0;padding-left:20px}ol.chain li{margin:3px 0}
 .grp{margin:18px 0 6px;font-weight:600}
 a{color:var(--acc)}
 summary img{cursor:zoom-in}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:6px 0}
+.wc{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--bg);font-size:12.5px}
+.wc img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;cursor:zoom-in;background:var(--chip)}
+.wc .t{padding:7px 9px}.wc .t b{font-size:14px}.wc .nmw{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:3px 0}
+.dist{display:flex;gap:0;margin:8px 0 2px;font-size:12px}.dist div{flex:1;border-left:1px solid var(--line);padding:2px 6px}.dist div:first-child{border:0}
+.dist b{display:block;font-size:14px;font-variant-numeric:tabular-nums}
+.note{background:var(--chip);border-radius:8px;padding:8px 11px;margin:8px 0}
 .phs{display:flex;gap:8px;flex-wrap:wrap}.phs img{width:120px;height:120px;object-fit:cover;border-radius:8px;cursor:zoom-in;background:var(--chip);border:1px solid var(--line)}
 #lb{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;z-index:50;touch-action:none;user-select:none}
 #lb.on{display:block}
@@ -76,6 +83,7 @@ summary img{cursor:zoom-in}
 const D=/*DATA*/null;
 const I=D.items, byN={}; I.forEach(x=>byN[x.n]=x);
 const fmt=v=>v==null?'—':Math.round(v).toLocaleString('ru-RU');
+const pl=(n,a,b,c)=>{const m=Math.abs(n)%100,k=m%10;return `${fmt(n)} ${m>10&&m<20?c:k===1?a:k>=2&&k<=4?b:c}`};
 const dec=v=>v==null?'—':String(v).replace('.',',');
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const rec=x=>x.plan.cap3_half70;
@@ -181,7 +189,7 @@ function planWhy(x,k,cap){
 function body(x){
  const crit=Object.entries(x.R), max={'спрос':20,'читаемость':20,'профиль':20,'повод':15,'качество':15,'комплектность':10};
  const setNote=x.qty>(rec(x)?rec(x)[1]:0)?`<p>В рекомендованном варианте ещё ${x.qty-(rec(x)?rec(x)[1]:0)} шт идут в наборы «колье + серьги»; итого к закупке ${x.qty} шт.</p>`:'';
- return `<div class="phs">${phs(x)}</div><h4>Почему такое решение</h4>${chain(x)}
+ return `<div class="phs">${phs(x)}</div><h4>Почему такая цена возможна</h4>${priceWhy(x)}<h4>Почему такое решение</h4>${chain(x)}
  <h4>Расчёт ROI</h4>${roiTable(x)}
  <h4>Варианты закупки</h4><div class="wrap"><table><tr><th>Вариант</th><th>Решение</th><th>Почему</th></tr>
  <tr><td>Рекомендованный</td><td>${esc(rec(x)?rec(x)[0]:'—')}</td><td>${planWhy(x,'cap3_half70',3)}</td></tr>
@@ -211,6 +219,7 @@ function how(){
  <h4>5. Рынок и ROI на рынке</h4><p>Для группы «сегмент × стиль» берутся запросы WB (выдача 28.10, заказы за 30 дней). Медиана витрины карточек с ≥30 заказами, делённая на 0,65, — цена продавца на рынке; по ней считается «ROI на рынке». Запас = медиана витрины / нужная витрина.</p>
  <h4>6. Решение</h4><ol class="chain"><li>Стоп-фактор (копия бренда и т. п.) → не брать.</li><li>Баллы < 55 → не брать.</li><li>Цена подтверждена, если по запросу ≥5 карточек с ≥30 заказами продаются на витрине не ниже нужной и хотя бы одна из них новая (<100 отзывов).</li><li>Подтверждена и баллы ≥70 → оплатить; подтверждена и 55–69 → тест; не подтверждена и ≥70 → тест; иначе не брать.</li></ol>
  <h4>7. Варианты первой волны</h4><ul><li><b>Оплатить 50 шт</b> — «оплатить» и запас ≥ 1,15 (№108, 111, 114, 199 — в тест: близнецы на WB дешевле).</li><li><b>Рекомендованный:</b> при баллах 70–74 — 25 шт.</li><li><b>Тест 10 шт</b> — «оплатить» с запасом < 1,15 или «тест» с запасом ≥ 1,0. В строгом и рекомендованном вариантах — не больше 3 лучших по запасу в группе «запрос WB × стиль».</li><li>Запас < 1,0 → отложить до данных продаж.</li><li>Наборы — 15 самых дешёвых проверенных пар по 10 шт.</li></ul>
+ <h4>8. Аналоги и копии в карточке позиции</h4><ul><li><b>3 аналога по стилю</b> — самые похожие по фото (CLIP ViT-B-32) из карточек группы, которые продаются по нужной витрине и дороже с ≥30 заказами. Если таких меньше трёх, добавлены самые похожие из более дешёвых, с пометкой «дешевле нужной».</li><li><b>Копия конкурента</b> — карточка WB с тем же фото. Совпадение проверяется по точкам изображения (ORB + RANSAC) среди 5 ближайших по CLIP. От 30 точек — то же фото, 10–29 — возможно та же модель, это стоит проверить глазами. Всего сравнено 3 007 карточек WB.</li><li>Вывод о цене делается по всей группе. Аналоги и копии его иллюстрируют, а копия, которая продаётся дешевле, — прямой риск.</li></ul>
  <h4>Сводка</h4><table><tr><th>Решение по канону</th><th class="r">Позиций</th></tr>
  <tr><td>Оплатить</td><td class="r">${cnt(x=>x.dec==='оплатить')}</td></tr><tr><td>Тест</td><td class="r">${cnt(x=>x.dec.startsWith('тест'))}</td></tr>
  <tr><td>Не брать: баллы < 55</td><td class="r">${cnt(x=>x.dec.includes('< 55'))}</td></tr><tr><td>Не брать: цена не подтверждена</td><td class="r">${cnt(x=>x.dec.includes('цена'))}</td></tr>
@@ -219,6 +228,38 @@ function how(){
  </div>`;
 }
 function phs(x){let h='';for(let k=1;k<=Math.max(x.ph,1);k++)h+=`<img src="${bigSrc(x.n,k)}" data-lb="${x.n}" data-k="${k}" alt="" onerror="this.onerror=null;this.src='data:image/jpeg;base64,${x.img}'">`;return h}
+function wbCard(c,thr,tag){const w=D.wb[c.nm]; if(!w)return '';
+ const okp=w.price>=thr, src=`логика_ROI_фото/wb/${c.nm}.jpg`;
+ return `<div class="wc"><img src="${src}" data-wb="${c.nm}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${esc(w.img)}'"><div class="t">
+ <b>${fmt(w.price)} ₽</b> <span class="b ${okp?'ok':'bad'}">${okp?'≥ нужной витрины':'дешевле нужной'}</span>
+ <div class="nmw">${esc(w.name)}</div><div class="m">${pl(w.orders30,'заказ','заказа','заказов')} за 30 дн · ${pl(w.rating_cnt||0,'отзыв','отзыва','отзывов')}${(w.rating_cnt||0)<100?' (новая)':''}</div>
+ <div class="m">сходство фото ${Math.round(c.sim*100)} %${tag?' · '+tag:''} · <a href="${esc(w.url)}" target="_blank" rel="noopener">WB ${c.nm}</a></div></div></div>`}
+function priceWhy(x){
+ const d=x.dist, sculpt=x.q0.startsWith('скульптурное'), mk=x.ok>=5&&x.fresh>=1, share=x.hot?Math.round(100*x.ok/x.hot):0;
+ let h=`<p>Для ROI 100 % при вложениях ${fmt(x.inv)} ₽ продавать нужно не дешевле <b>${fmt(x.need)} ₽</b> до СПП. При СПП 35 % покупатель видит <b>${fmt(x.thr)} ₽</b> на витрине. Это нижняя граница цены, а не цена, которую мы поставим.</p>`;
+ if(!x.qs.length) return h+`<div class="note"><b>Цену подтвердить нечем.</b> Для сегмента «${esc(x.seg)}» выдача WB 28.10 не собиралась, поэтому аналогов и копий нет. Решение принято без проверки рынка: цена считается неподтверждённой.</div>`;
+ if(!x.hot) return h+`<p>Рынок проверен по выдаче WB 28.10 по запросам ${x.qs.map(q=>'«'+esc(q)+'»').join(', ')}.</p><div class="note"><b>Цену подтвердить нечем.</b> В выдаче нет карточек с ≥30 заказами за 30 дней, поэтому нет ни медианы, ни аналогов. Цена считается неподтверждённой.</div>`;
+ h+= sculpt?`<p>Рынок — ${x.hot} продающихся карточек скульптурного золота, отобранных глазами из выдачи WB 28.10 по нескольким запросам.</p>`
+  :`<p>Рынок проверен по выдаче WB 28.10 (заказы за 30 дней из MPSTATS) по запросам ${x.qs.map(q=>'«'+esc(q)+'»').join(', ')}. Аналогов с ≥30 заказами за 30 дней — ${x.hot}.</p>`;
+ if(x.hot) h+=`<div class="dist"><div>минимум<b>${fmt(d[0])} ₽</b></div><div>¼ дешевле<b>${fmt(d[1])} ₽</b></div><div>медиана<b>${fmt(d[2])} ₽</b></div><div>¼ дороже<b>${fmt(d[3])} ₽</b></div><div>максимум<b>${fmt(d[4])} ₽</b></div></div><p class="m">Витрины продающихся аналогов, уже со СПП.</p>`;
+ h+=`<p>По витрине ${fmt(x.thr)} ₽ и дороже продаются <b>${x.ok} из ${x.hot}</b> (${share} %), из них новых карточек (меньше 100 отзывов) — ${x.fresh}. `+
+  (mk?`Значит, по такой цене этот тип товара покупают, причём и у новых продавцов без отзывов. Медиана рынка ${fmt(x.med)} ₽ выше нужной витрины в ${dec(x.hr)} раза, отсюда ROI на рынке ${x.rm?x.rm[3]:'—'} %.</p>`
+      :`Правило подтверждения: нужно ≥5 таких карточек и хотя бы одна новая. Здесь правило не выполнено, поэтому цена считается неподтверждённой.</p>`);
+ const cp=(x.cp||[]).filter(c=>D.wb[c.nm]), same=cp.filter(c=>c.same), near=cp.filter(c=>!c.same);
+ if(same.length){const lo=same.filter(c=>D.wb[c.nm].price<x.thr).length;
+  h+=`<div class="note"><b>Это копия конкурента.</b> На WB продаётся та же вещь: фото совпадают по ${same.map(c=>c.orb).join(', ')} точкам (порог — 30). `+
+   (lo?`${lo===same.length?(lo===1?'Копия продаётся':'Все копии продаются'):lo+' из '+same.length+' продаются'} дешевле нужной витрины ${fmt(x.thr)} ₽. Это риск: покупатель увидит ту же вещь дешевле.`
+   :same.some(c=>D.wb[c.nm].orders30>=30)?`Копия продаётся не дешевле нужной витрины ${fmt(x.thr)} ₽ и набирает ≥30 заказов за 30 дней. Это прямое подтверждение цены.`
+   :`Копия стоит не дешевле нужной витрины ${fmt(x.thr)} ₽, но заказов у неё меньше 30 за 30 дней. Цену она подтверждает слабо, основа вывода — группа аналогов.`)+`</div><div class="cards">${same.map(c=>wbCard(c,x.thr,'копия')).join('')}</div>`;}
+ if(near.length) h+=`<div class="note">Возможно, та же модель в другом цвете или на другом фото: совпадение ${near.map(c=>c.orb).join(', ')} точек, меньше порога копии. Стоит проверить глазами.</div><div class="cards">${near.map(c=>wbCard(c,x.thr,'похожая модель')).join('')}</div>`;
+ if(!cp.length&&x.top) h+=`<p class="m">Копий не найдено: среди ${fmt(x.nwb)} карточек WB, по которым проверялась цена, нет того же фото. Самое похожее совпадает по CLIP на ${Math.round(x.top.sim*100)} %.</p>`;
+ const an=(x.an||[]).filter(c=>D.wb[c.nm]&&!same.some(s=>s.nm===c.nm));
+ if(an.length){h+=`<p><b>3 аналога по стилю, на которых основан вывод.</b> `+(an.every(c=>c.ok)?`Это самые похожие по фото из ${x.ok} карточек, которые продаются по нужной витрине и дороже.`:an.some(c=>c.ok)?`Похожих среди продающихся по нужной витрине меньше трёх, добавлены самые похожие из более дешёвых.`:`Ни одна карточка не продаётся по нужной витрине, показаны самые похожие из более дешёвых.`)+
+  ` Сам вывод сделан по всей группе: медиана и число карточек выше.</p><div class="cards">${an.map(c=>wbCard(c,x.thr)).join('')}</div>`;}
+ if(x.like&&D.wb[x.like.nm]&&!an.some(c=>c.nm===x.like.nm)&&!cp.some(c=>c.nm===x.like.nm))
+  h+=`<p><b>Хит WB из среза 22.10</b>, на котором основан балл «спрос».</p><div class="cards">${wbCard(x.like,x.thr,'хит')}</div>`;
+ return h;
+}
 const bigSrc=(n,k)=>`логика_ROI_фото/${String(n).padStart(4,'0')}_${k}.jpg`;
 // окно фото: колесо и щипок — приближение к точке, перетаскивание — сдвиг, двойной клик — ×2,5 / вписать
 const LB=document.getElementById('lb'), ST=LB.querySelector('.st'), IM=LB.querySelector('img');
@@ -231,9 +272,10 @@ function openLb(n,k){const x=byN[n];lb.n=n;lb.k=k||1;IM.onload=fitImg;
  LB.querySelector('.lo').textContent='';IM.src=bigSrc(n,lb.k);
  LB.querySelector('.cap').textContent=`№${n} · ${x.name}`+(x.ph>1?` · фото ${lb.k} из ${x.ph}`:'');
  LB.querySelectorAll('.nav').forEach(b=>b.style.display=x.ph>1?'':'none');LB.classList.add('on')}
+function openWb(nm,src){const w=D.wb[nm];lb.n=0;IM.onload=fitImg;IM.onerror=null;LB.querySelector('.lo').textContent='';IM.src=src;LB.querySelector('.cap').textContent=`WB ${nm} · ${fmt(w.price)} ₽ · ${w.name}`;LB.querySelectorAll('.nav').forEach(b=>b.style.display='none');LB.classList.add('on')}
 function closeLb(){LB.classList.remove('on');IM.removeAttribute('src')}
-function step(d){const x=byN[lb.n];if(x.ph>1)openLb(lb.n,(lb.k-1+d+x.ph)%x.ph+1)}
-document.addEventListener('click',e=>{const t=e.target.closest('[data-lb]');if(!t)return;e.preventDefault();e.stopPropagation();openLb(+t.dataset.lb,+(t.dataset.k||1))},true);
+function step(d){const x=byN[lb.n];if(x&&x.ph>1)openLb(lb.n,(lb.k-1+d+x.ph)%x.ph+1)}
+document.addEventListener('click',e=>{const w=e.target.closest('[data-wb]');if(w){e.preventDefault();e.stopPropagation();openWb(w.dataset.wb,w.src);return}const t=e.target.closest('[data-lb]');if(!t)return;e.preventDefault();e.stopPropagation();openLb(+t.dataset.lb,+(t.dataset.k||1))},true);
 LB.querySelector('.x').onclick=closeLb;LB.querySelector('.prev').onclick=()=>step(-1);LB.querySelector('.next').onclick=()=>step(1);
 LB.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{const z=+b.dataset.z,W=ST.clientWidth/2,H=ST.clientHeight/2;z?zoomAt(z>0?1.5:1/1.5,W,H):fitImg()});
 ST.addEventListener('click',e=>{if(e.target===ST&&!moved)closeLb()});

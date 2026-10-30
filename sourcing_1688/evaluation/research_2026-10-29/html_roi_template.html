@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Логика ROI бижутерии</title>
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--ink:#1d1d1b;--muted:#6b6b66;--line:#e3e2dd;--acc:#2f5bd3;--ok:#1f8a4c;--okbg:#e5f4ea;--warn:#a86400;--warnbg:#fbf0dc;--bad:#b3261e;--badbg:#fbe6e4;--chip:#efeee9}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151514;--card:#1f1f1d;--ink:#ecebe6;--muted:#9c9b94;--line:#33332f;--acc:#7f9ef0;--ok:#5cc58a;--okbg:#17301f;--warn:#e0a650;--warnbg:#33280f;--bad:#f08a80;--badbg:#3a1a17;--chip:#2a2a27}}
+:root[data-theme="dark"]{--bg:#151514;--card:#1f1f1d;--ink:#ecebe6;--muted:#9c9b94;--line:#33332f;--acc:#7f9ef0;--ok:#5cc58a;--okbg:#17301f;--warn:#e0a650;--warnbg:#33280f;--bad:#f08a80;--badbg:#3a1a17;--chip:#2a2a27}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+header{padding:20px 16px 0;max-width:1180px;margin:0 auto}
+h1{font-size:20px;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 14px}
+nav{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);max-width:1180px;margin:0 auto;padding:0 16px}
+nav button{background:none;border:0;border-bottom:2px solid transparent;padding:9px 12px;font:inherit;color:var(--muted);cursor:pointer}
+nav button.on{color:var(--ink);border-color:var(--acc);font-weight:600}
+nav .cnt{font-size:12px;color:var(--muted);margin-left:4px}
+main{max-width:1180px;margin:0 auto;padding:14px 16px 60px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.bar input,.bar select{font:inherit;padding:6px 9px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)}
+.bar input{flex:1;min-width:180px}
+.found{color:var(--muted);font-size:13px}
+details.it{background:var(--card);border:1px solid var(--line);border-radius:9px;margin-bottom:6px}
+details.it>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:44px 52px 1fr auto;gap:10px;align-items:center;padding:6px 10px}
+details.it>summary::-webkit-details-marker{display:none}
+summary img,.ph{width:44px;height:44px;border-radius:6px;object-fit:cover;background:var(--chip)}
+.num{font-weight:600;font-variant-numeric:tabular-nums}
+.nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nm small{color:var(--muted)}
+.kpi{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;font-variant-numeric:tabular-nums;font-size:13px}
+.chip{background:var(--chip);border-radius:20px;padding:2px 8px;white-space:nowrap}
+.b{border-radius:20px;padding:2px 9px;font-weight:600;white-space:nowrap;font-size:12px}
+.b.ok{background:var(--okbg);color:var(--ok)}.b.warn{background:var(--warnbg);color:var(--warn)}.b.bad{background:var(--badbg);color:var(--bad)}.b.mid{background:var(--chip);color:var(--muted)}
+.body{padding:4px 14px 14px;border-top:1px solid var(--line)}
+.body h4{margin:14px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+td,th{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.tot td{font-weight:600}
+ol.chain{margin:0;padding-left:20px}ol.chain li{margin:3px 0}
+.y{color:var(--ok)}.n{color:var(--bad)}.m{color:var(--muted)}
+.wrap{overflow-x:auto}
+.prose{max-width:820px}.prose p,.prose li{margin:6px 0}
+.formula{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:13px;overflow-x:auto}
+.grp{margin:18px 0 6px;font-weight:600}
+a{color:var(--acc)}
+@media (max-width:640px){details.it>summary{grid-template-columns:44px auto 1fr;}.kpi{grid-column:1/-1;justify-content:flex-start}}
+</style>
+</head>
+<body>
+<header>
+<h1>Логика ROI и решений: 1 485 позиций бижутерии с 1688</h1>
+<p class="sub">Канон юнит-экономики ①…⑨, данные на 30.10.2026. Раскройте позицию, чтобы увидеть расчёт ROI и причину решения.</p>
+</header>
+<nav id="tabs"></nav>
+<main id="main"></main>
+<script>
+const D=/*DATA*/null;
+const I=D.items, byN={}; I.forEach(x=>byN[x.n]=x);
+const fmt=v=>v==null?'—':Math.round(v).toLocaleString('ru-RU');
+const dec=v=>v==null?'—':String(v).replace('.',',');
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const rec=x=>x.plan.cap3_half70;
+const decCls=d=>d==='оплатить'?'ok':d.startsWith('тест')?'warn':'bad';
+const planCls=a=>!a?'mid':a.startsWith('оплатить')?'ok':a==='тест 10'?'warn':'mid';
+const TABS=[
+ {id:'how',t:'Как считается'},
+ {id:'wave',t:'Первая волна',f:x=>(rec(x)&&rec(x)[1]>0)||x.qty>0,group:x=>rec(x)&&rec(x)[1]>0?rec(x)[0]:'только в наборы'},
+ {id:'pay',t:'Оплатить',f:x=>x.dec==='оплатить'},
+ {id:'test',t:'Тест',f:x=>x.dec.startsWith('тест')},
+ {id:'no',t:'Не брать',f:x=>x.dec.startsWith('не брать'),group:x=>x.dec.replace(/ №\d+/,'')},
+ {id:'sets',t:'Наборы'},
+ {id:'all',t:'Все позиции',f:x=>true},
+];
+let cur=localGet('tab')||'how';
+function localGet(k){try{return localStorage.getItem('roi_'+k)}catch(e){return null}}
+function localSet(k,v){try{localStorage.setItem('roi_'+k,v)}catch(e){}}
+function nav(){
+ document.getElementById('tabs').innerHTML=TABS.map(t=>{
+  const c=t.f?I.filter(t.f).length:t.id==='sets'?D.sets.length:'';
+  return `<button data-t="${t.id}" class="${t.id===cur?'on':''}">${t.t}${c!==''?`<span class="cnt">${c}</span>`:''}</button>`}).join('');
+ document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{cur=b.dataset.t;localSet('tab',cur);nav();show()});
+}
+const segs=[...new Set(I.map(x=>x.seg))].sort();
+function show(){
+ const t=TABS.find(t=>t.id===cur)||TABS[0], m=document.getElementById('main');
+ if(t.id==='how')return m.innerHTML=how();
+ if(t.id==='sets')return m.innerHTML=setsTab();
+ m.innerHTML=`<div class="bar"><input id="q" placeholder="Поиск: №, описание, стиль, запрос WB"><select id="seg"><option value="">Все сегменты</option>${segs.map(s=>`<option>${esc(s)}</option>`).join('')}</select>
+ <select id="sort"><option value="n">По номеру</option><option value="roi">По ROI на рынке ↓</option><option value="hr">По запасу цены ↓</option><option value="total">По баллам ↓</option><option value="cny">По цене ¥ ↑</option></select><span class="found" id="found"></span></div><div id="list"></div>`;
+ ['q','seg','sort'].forEach(id=>document.getElementById(id).oninput=()=>list(t));
+ list(t);
+}
+function list(t){
+ const q=document.getElementById('q').value.trim().toLowerCase(), sg=document.getElementById('seg').value, so=document.getElementById('sort').value;
+ let a=I.filter(t.f).filter(x=>(!sg||x.seg===sg)&&(!q||String(x.n)===q.replace('№','')||(x.name+' '+x.style+' '+x.q0+' '+x.seg+' '+x.cn).toLowerCase().includes(q)));
+ const key={n:x=>x.n,roi:x=>-(x.rm?x.rm[3]:-1e9),hr:x=>-(x.hr??-1e9),total:x=>-x.total,cny:x=>x.cny}[so];
+ a.sort((p,r)=>key(p)-key(r)||p.n-r.n);
+ document.getElementById('found').textContent=`Найдено: ${a.length}`;
+ let h='';
+ if(t.group){const g={};a.forEach(x=>(g[t.group(x)]=g[t.group(x)]||[]).push(x));
+  const order=['оплатить 50','оплатить 25 (70–74 балла)','тест 10','только в наборы'];
+  Object.keys(g).sort((p,r)=>(order.indexOf(p)+1||9)-(order.indexOf(r)+1||9)).forEach(k=>{h+=`<div class="grp">${esc(k)} — ${g[k].length}</div>`+g[k].map(row).join('')})}
+ else h=a.map(row).join('');
+ const L=document.getElementById('list');L.innerHTML=h||'<p class="m">Ничего не найдено.</p>';
+ L.querySelectorAll('details.it').forEach(d=>d.addEventListener('toggle',()=>{if(d.open&&!d.dataset.r){d.querySelector('.body').innerHTML=body(byN[d.dataset.n]);d.dataset.r=1}}));
+}
+function row(x){
+ const p=rec(x), roiM=x.rm?x.rm[3]:null;
+ return `<details class="it" data-n="${x.n}"><summary>${x.img?`<img src="data:image/jpeg;base64,${x.img}" alt="">`:'<div class="ph"></div>'}<span class="num">№${x.n}</span>
+ <span class="nm">${esc(x.name)}<br><small>${esc(x.seg)} · ${esc(x.style)} · заказ «${esc(x.order)}», стр. ${x.row}</small></span>
+ <span class="kpi"><span class="chip">¥${dec(x.cny)}</span><span class="chip">${x.total} балл.</span><span class="chip">ROI ${roiM==null?'—':roiM+' %'}</span><span class="chip">запас ×${dec(x.hr)}</span>
+ <span class="b ${decCls(x.dec)}">${esc(x.dec)}</span><span class="b ${planCls(p&&p[0])}">${p?esc(p[0])+(p[1]?' · '+p[1]+' шт':''):'вне плана'}</span></span></summary><div class="body"></div></details>`;
+}
+function roiTable(x){
+ const r=x.rm, n=x.rn, cf=D.cf;
+ const pre=P=>`${dec(cf.a.toFixed(3))} × ${fmt(P)} ${cf.b<0?'−':'+'} ${Math.abs(cf.b).toFixed(0)}`;
+ return `<div class="wrap"><table>
+ <tr><th>Шаг</th><th>Как считается</th><th class="r">₽</th></tr>
+ <tr><td>① Закупка</td><td>¥${dec(x.cny)} × 12,72 ₽ (курс + комиссия посредника)</td><td class="r">${fmt(x.yuan)}</td></tr>
+ <tr><td>② Фулфилмент</td><td>фиксированно за единицу</td><td class="r">22</td></tr>
+ <tr><td>③ Карго</td><td>${x.w} г × 0,285 ₽/г ($3/кг); вес: ${esc(x.wsrc)}</td><td class="r">${fmt(x.cargo)}</td></tr>
+ ${x.pack?`<tr><td>④ Упаковка</td><td>коробка набора</td><td class="r">20</td></tr>`:''}
+ <tr class="tot"><td>Вложения</td><td>сумма</td><td class="r">${fmt(x.inv)}</td></tr>
+ <tr><td>Нужная цена</td><td>цена продавца до СПП, при которой ROI = 100 %: (вложения × ${dec(cf.k.toFixed(3))} ${cf.b<0?'+':'−'} ${Math.abs(cf.b).toFixed(0)}) / (${dec(cf.a.toFixed(3))} − 0,10)</td><td class="r">${fmt(x.need)}</td></tr>
+ <tr><td>Нужная витрина</td><td>нужная цена × (1 − СПП 35 %)</td><td class="r">${fmt(x.thr)}</td></tr>
+ <tr><td>Рынок</td><td>запрос «${esc(x.q0)}»: ${x.hot} карточек с ≥30 заказами за 30 дней, медиана витрины</td><td class="r">${fmt(x.med)}</td></tr>
+ <tr><td>Цена на рынке</td><td>медиана витрины / 0,65 = цена продавца до СПП</td><td class="r">${fmt(x.Pm)}</td></tr>
+ ${r?`<tr><td>К перечислению</td><td>${pre(x.Pm)}: после комиссии 37,5 %, логистики, обратной логистики невыкупа и НДС 5 % (подгонка по ${cf.n} вашим карточкам)</td><td class="r">${fmt(r[0])}</td></tr>
+ <tr><td>Реклама</td><td>10 % цены</td><td class="r">−${fmt(r[1])}</td></tr>
+ <tr><td>Прибыль</td><td>(к перечислению − реклама − вложения)${r[2]>0?' × 0,85 (УСН 15 % с прибыли)':' — убыток, налога нет'}</td><td class="r">${fmt(r[2])}</td></tr>
+ <tr class="tot"><td>ROI на рынке</td><td>прибыль / вложения</td><td class="r ${r[3]>=100?'y':'n'}">${r[3]} %</td></tr>`:'<tr><td colspan="3" class="m">У группы нет карточек с ≥30 заказами — ROI на рынке не посчитать.</td></tr>'}
+ <tr><td>Проверка</td><td>при нужной цене ${fmt(x.need)} ₽ ROI</td><td class="r">${n[3]} %</td></tr>
+ <tr class="tot"><td>Запас цены</td><td>медиана витрины / нужная витрина</td><td class="r ${x.hr>=1.15?'y':x.hr>=1?'':'n'}">×${dec(x.hr)}</td></tr>
+ </table></div>`;
+}
+function chain(x){
+ const L=[], st=x.stops&&x.stops.length, marketOk=x.ok>=5&&x.fresh>=1;
+ L.push(st?`<span class="n">Стоп-фактор: ${esc(x.stops.join('; '))}</span> → не брать.`:`<span class="y">Стоп-факторов нет.</span>`);
+ if(!st){
+  L.push(x.total>=55?`<span class="y">Баллы ${x.total} ≥ 55</span> — позиция проходит отбор.`:`<span class="n">Баллы ${x.total} < 55</span> → не брать (см. разбивку ниже).`);
+  if(x.total>=55){
+   L.push(`Рынок: при нужной витрине ≥${fmt(x.thr)} ₽ по «${esc(x.q0)}» продаются ${x.ok} карточек с ≥30 заказами, из них новых (<100 отзывов) ${x.fresh}. Правило: ≥5 карточек и ≥1 новая → `+(marketOk?'<span class="y">цена подтверждена</span>.':'<span class="n">не подтверждена</span>.'));
+   if(marketOk)L.push(x.total>=70?`<span class="y">Баллы ${x.total} ≥ 70</span> → оплатить.`:`Баллы ${x.total} < 70 → тест 20–30 шт.`);
+   else L.push(x.total>=70?`Баллы ${x.total} ≥ 70, но цена не подтверждена → только тест.`:`Баллы ${x.total} < 70 и цена не подтверждена → не брать.`);
+  }
+ }
+ if(x.dec.includes('дубль'))L.push(`<span class="n">${esc(x.why)}</span> → не брать (дубль).`);
+ return `<ol class="chain">${L.map(l=>`<li>${l}</li>`).join('')}</ol><p class="m">Итог по канону: <b>${esc(x.dec)}</b>. ${esc(x.why.charAt(0).toUpperCase()+x.why.slice(1)).replace(/(\d)\.(\d)/g,'$1,$2')}</p>`;
+}
+function planWhy(x,k,cap){
+ const p=x.plan[k]; if(!p)return x.dec.startsWith('не брать')?'не входит: решение «не брать»':'—';
+ const a=p[0], rk=x.rank;
+ if(a.startsWith('оплатить 50'))return `${p[1]} шт: «оплатить» и запас ×${dec(x.hr)} ≥ 1,15`;
+ if(a.startsWith('оплатить 25'))return `${p[1]} шт: «оплатить», запас ≥ 1,15, но баллы ${x.total} — 70–74, порог хрупкий, партия вдвое меньше`;
+ if(a.startsWith('весна'))return 'свадебный комплект без запаса ≥ 1,15 — весенняя волна';
+ if(a.startsWith('отложить'))return `запас ×${dec(x.hr)} < 1,0: медиана рынка ниже нужной витрины — до данных продаж`;
+ const pre=x.hit?'хитовые серьги, близнецы на WB дешевле — в тест; ':x.dec==='оплатить'?`«оплатить», но запас ×${dec(x.hr)} < 1,15 — в тест; `:`тест с запасом ×${dec(x.hr)} ≥ 1,0; `;
+ if(!cap)return pre+`${p[1]} шт`;
+ const r=rk?`место ${rk[0]} из ${rk[1]} по запасу в группе «${esc(rk[2])} × ${esc(x.style)}»`:'';
+ return pre+r+(a==='тест 10'?` (берутся 3 лучших) → ${p[1]} шт`:' → ждёт следующей очереди');
+}
+function body(x){
+ const crit=Object.entries(x.R), max={'спрос':20,'читаемость':20,'профиль':20,'повод':15,'качество':15,'комплектность':10};
+ const setNote=x.qty>(rec(x)?rec(x)[1]:0)?`<p>В рекомендованном варианте ещё ${x.qty-(rec(x)?rec(x)[1]:0)} шт идут в наборы «колье + серьги»; итого к закупке ${x.qty} шт.</p>`:'';
+ return `<h4>Почему такое решение</h4>${chain(x)}
+ <h4>Расчёт ROI</h4>${roiTable(x)}
+ <h4>Варианты закупки</h4><div class="wrap"><table><tr><th>Вариант</th><th>Решение</th><th>Почему</th></tr>
+ <tr><td>Рекомендованный</td><td>${esc(rec(x)?rec(x)[0]:'—')}</td><td>${planWhy(x,'cap3_half70',3)}</td></tr>
+ <tr><td>Строгий</td><td>${esc(x.plan.cap3?x.plan.cap3[0]:'—')}</td><td>${planWhy(x,'cap3',3)}</td></tr>
+ <tr><td>Широкий</td><td>${esc(x.plan.cap0?x.plan.cap0[0]:'—')}</td><td>${planWhy(x,'cap0',0)}</td></tr></table></div>${setNote}
+ <h4>Баллы: ${x.total} из 100</h4><div class="wrap"><table><tr><th>Критерий</th><th class="r">Балл</th><th>Причина</th></tr>
+ ${crit.map(([k,[v,w]])=>`<tr><td>${k}</td><td class="r">${v} / ${max[k]||''}</td><td>${esc(w)}</td></tr>`).join('')}</table></div>
+ <p class="m">1688: <a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.url)}</a> · ${esc(x.cn)}</p>`;
+}
+function setsTab(){
+ const S=[...D.sets].sort((a,b)=>(b.inplan-a.inplan)||a.need-b.need);
+ return `<p class="prose">56 пар «колье + серьги». В план идут 15 самых дешёвых по нужной цене из тех, что проходят по канону и проверены глазами, по 10 шт. Упаковка набора 20 ₽ входит во вложения. Рынок — продающиеся комплекты WB (≥30 заказов за 30 дней).</p>
+ <div class="wrap"><table><tr><th>Пара</th><th class="r">¥</th><th class="r">Вложения</th><th class="r">Нужная цена</th><th class="r">Нужная витрина</th><th class="r">Продаются выше</th><th class="r">ROI на рынке</th><th class="r">Запас</th><th>Глазами</th><th>Решение</th></tr>
+ ${S.map(c=>`<tr><td>№${c.neck} + №${c.ear}</td><td class="r">${dec(c.cny)}</td><td class="r">${fmt(c.inv)}</td><td class="r">${fmt(c.need)}</td><td class="r">${fmt(c.thr)}</td><td class="r">${c.market} (новых ${c.fresh})</td><td class="r">${c.rm?c.rm[3]+' %':'—'}</td><td class="r">×${dec(c.hr)}</td><td>${c.eye?'да':'<span class="n">нет</span>'}</td>
+ <td>${c.inplan?'<span class="b ok">в плане · 10 шт</span>':!c.ok?'<span class="b bad">цена не подтверждена</span>':!c.eye?'<span class="b mid">не проверен глазами</span>':'<span class="b mid">не вошёл в 15 дешёвых</span>'}</td></tr>`).join('')}</table></div>
+ <p class="m">ROI на рынке у наборов считается по медиане витрины всех продающихся комплектов (медиана/0,65 = цена продавца), так что он одинаков по рынку и различается только вложениями.</p>`;
+}
+function how(){
+ const cf=D.cf, cnt=f=>I.filter(f).length;
+ return `<div class="prose">
+ <p><b>ROI считается по канону юнит-экономики ①…⑨</b>, подогнанному по ${cf.n} вашим карточкам бижутерии (живые тарифы WB 28.10). Для каждой позиции считаются вложения, цена продавца, нужная для ROI 100 %, и ROI при медиане цены продающихся аналогов.</p>
+ <h4>1. Вложения на 1 шт</h4><div class="formula">вложения = ¥ × 12,72 + 22 (ФФ) + 0,285 × вес_г (карго $3/кг) + 20 (коробка, только наборы)</div>
+ <h4>2. Сколько WB перечислит</h4><div class="formula">к перечислению ≈ ${dec(cf.a.toFixed(4))} × P ${cf.b<0?'−':'+'} ${dec(Math.abs(cf.b).toFixed(1))}</div>
+ <p>P — цена продавца до СПП. Внутри: комиссия 37,5 %, логистика, обратная логистика × (1 − выкуп), НДС 5 %.</p>
+ <h4>3. Прибыль и ROI</h4><div class="formula">прибыль = 0,85 × (к перечислению − 0,10 × P − вложения)   // реклама 10 %, УСН 15 % с прибыли<br>ROI = прибыль / вложения</div>
+ <h4>4. Нужная цена для ROI 100 %</h4><div class="formula">P_нужн = (вложения × ${dec(cf.k.toFixed(4))} + ${dec(Math.abs(cf.b).toFixed(1))}) / (${dec(cf.a.toFixed(4))} − 0,10)<br>нужная витрина = P_нужн × 0,65   // СПП бижутерии ~35 %</div>
+ <h4>5. Рынок и ROI на рынке</h4><p>Для группы «сегмент × стиль» берутся запросы WB (выдача 28.10, заказы за 30 дней). Медиана витрины карточек с ≥30 заказами, делённая на 0,65, — цена продавца на рынке; по ней считается «ROI на рынке». Запас = медиана витрины / нужная витрина.</p>
+ <h4>6. Решение</h4><ol class="chain"><li>Стоп-фактор (копия бренда и т. п.) → не брать.</li><li>Баллы < 55 → не брать.</li><li>Цена подтверждена, если по запросу ≥5 карточек с ≥30 заказами продаются на витрине не ниже нужной и хотя бы одна из них новая (<100 отзывов).</li><li>Подтверждена и баллы ≥70 → оплатить; подтверждена и 55–69 → тест; не подтверждена и ≥70 → тест; иначе не брать.</li></ol>
+ <h4>7. Варианты первой волны</h4><ul><li><b>Оплатить 50 шт</b> — «оплатить» и запас ≥ 1,15 (№108, 111, 114, 199 — в тест: близнецы на WB дешевле).</li><li><b>Рекомендованный:</b> при баллах 70–74 — 25 шт.</li><li><b>Тест 10 шт</b> — «оплатить» с запасом < 1,15 или «тест» с запасом ≥ 1,0. В строгом и рекомендованном вариантах — не больше 3 лучших по запасу в группе «запрос WB × стиль».</li><li>Запас < 1,0 → отложить до данных продаж.</li><li>Наборы — 15 самых дешёвых проверенных пар по 10 шт.</li></ul>
+ <h4>Сводка</h4><table><tr><th>Решение по канону</th><th class="r">Позиций</th></tr>
+ <tr><td>Оплатить</td><td class="r">${cnt(x=>x.dec==='оплатить')}</td></tr><tr><td>Тест</td><td class="r">${cnt(x=>x.dec.startsWith('тест'))}</td></tr>
+ <tr><td>Не брать: баллы < 55</td><td class="r">${cnt(x=>x.dec.includes('< 55'))}</td></tr><tr><td>Не брать: цена не подтверждена</td><td class="r">${cnt(x=>x.dec.includes('цена'))}</td></tr>
+ <tr><td>Не брать: стоп-фактор</td><td class="r">${cnt(x=>x.dec.includes('стоп'))}</td></tr><tr><td>Дубли</td><td class="r">${cnt(x=>x.dec.includes('дубль'))}</td></tr></table>
+ <p class="m">Медиана ROI на рынке среди «оплатить»: ${(()=>{const v=I.filter(x=>x.dec==='оплатить'&&x.rm).map(x=>x.rm[3]).sort((a,b)=>a-b);return v[v.length>>1]})()} %. Источники: scored.json, consensus_plan_cap*.json, наборы_серьги/final_sets_canon.json; генератор — оценка_2026-10-28/html_roi.py.</p>
+ </div>`;
+}
+nav();show();
+</script>
+</body>
+</html>

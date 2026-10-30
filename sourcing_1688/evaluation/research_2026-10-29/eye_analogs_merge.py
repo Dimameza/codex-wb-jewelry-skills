@@ -3,7 +3,7 @@
 r[i] относится к аналогу an[i]; если аналога нет — null. html_roi.py берёт оценку, только если an совпадает с текущими аналогами."""
 import glob, json, os
 O = "eye_analogs"; out = {}
-for ix, pat in (("index.json", "res_[0-9].json"), ("index_metal.json", "res_metal_*.json")):
+for ix, pat in (("index.json", "res_[0-9].json"), ("index_metal.json", "res_metal_*.json"), ("index_market.json", "res_market_*.json"), ("index_collar.json", "res_collar_*.json")):   # 30.10: третий проход — выдача без фильтра
     if not os.path.exists(f"{O}/{ix}"): continue
     R = {}
     for f in sorted(glob.glob(f"{O}/{pat}")): R.update(json.load(open(f)))

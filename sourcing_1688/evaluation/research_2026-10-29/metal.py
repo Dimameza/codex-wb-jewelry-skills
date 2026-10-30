@@ -4,6 +4,7 @@
 CLIP: средний эмбеддинг подсказок «золотое» и «серебряное» украшение, отступ ≥ MARGIN, иначе «прочее» (жемчуг, бусы, шнур, неясно).
 Запуск: uv run -q --with open_clip_torch --with numpy python metal.py → metal.json {"ours": {№: m}, "wb": {nm: m}, "src": …}"""
 import json, re, numpy as np, torch, open_clip
+from collections import Counter
 MARGIN = 0.012
 P = {"gold": ["a photo of gold jewelry", "gold-colored metal necklace and earrings", "yellow gold plated jewelry"],
      "silver": ["a photo of silver jewelry", "silver-colored metal necklace and earrings", "white metal rhodium plated jewelry"]}
@@ -25,6 +26,23 @@ for i, r in enumerate(s):
 for k, x in enumerate(AW):
     tm = by_text(x["name"], False); cm, d = clip(E["wb"][k])
     out["wb"][x["nm"]] = tm or cm; out["src"]["wb"][x["nm"]] = "название" if tm else "CLIP"; out["clip"]["wb"][x["nm"]] = d
+# 30.10: жемчуг / без жемчуга — для групп бус и жемчуга (price_check_canon.py PEARL=1). Наши: основной стиль PEARL или PEARL среди стилей
+# и «жемчуг» в описании Claude. WB: «жемчуг» в названии, иначе CLIP (отступ ≥ PMARGIN), иначе «?» (остаётся в обеих группах).
+PMARGIN = 0.015
+PP = {"pearl": ["a necklace made of white pearls", "pearl beads jewelry", "jewelry with many pearls"],
+      "no": ["a necklace made of colorful stone beads", "metal chain jewelry without pearls", "crystal rhinestone jewelry"]}
+with torch.no_grad():
+    TP = {k: (lambda e: (e / e.norm(dim=-1, keepdim=True)).mean(0).numpy())(m.encode_text(tok(v))) for k, v in PP.items()}
+con = json.load(open("стили/consensus.json"))
+def pclip(e):
+    d = float(e @ TP["pearl"] - e @ TP["no"]); return ("pearl" if d > 0 else "no") if abs(d) >= PMARGIN else "?"
+out["pearl"] = {"ours": {}, "wb": {}}
+for i, r in enumerate(s):
+    c = con[str(i + 1)]; out["pearl"]["ours"][str(i + 1)] = c["основной"] == "PEARL" or ("PEARL" in c["стили"] and "жемчуг" in ((r.get("descr") or {}).get("claude") or "").lower())
+for k, x in enumerate(AW):
+    out["pearl"]["wb"][x["nm"]] = "pearl" if "жемчуг" in (x["name"] or "").lower() else pclip(E["wb"][k])
+named = [(pclip(E["wb"][k])) for k, x in enumerate(AW) if "жемчуг" in (x["name"] or "").lower()]
+print("жемчуг: наших", sum(out["pearl"]["ours"].values()), "| WB", Counter(out["pearl"]["wb"].values()), "| CLIP на карточках с «жемчуг» в названии", Counter(named))
 json.dump(out, open("metal.json", "w"), ensure_ascii=False)
 from collections import Counter
 print("наши", Counter(out["ours"].values()), "| WB", Counter(out["wb"].values()))

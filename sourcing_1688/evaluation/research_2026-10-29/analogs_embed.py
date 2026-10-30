@@ -15,7 +15,7 @@ def add(r, q=None):
                                           rating_cnt=r.get("rating_cnt"), url=r.get("url"), img=r.get("img"), queries=[]))
     for qq in ([q] if q else []) + list(r.get("queries") or []):
         if qq and qq not in x["queries"]: x["queries"].append(qq)
-for f in sorted(glob.glob(f"{PC}/raw/q*.json")):
+for f in sorted(glob.glob("../wb_market_2026-10-30/raw/q*.json")) + sorted(glob.glob(f"{PC}/raw/q*.json")):   # 30.10: сначала выдача без фильтра (свежие цены)
     if os.path.basename(f).startswith("._"): continue
     d = json.load(open(f))
     for r in d["rows"]:

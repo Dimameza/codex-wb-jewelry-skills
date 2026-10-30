@@ -3,7 +3,7 @@
 - оплатить (канон) и запас ≥1,15 → 50 шт; №108, 111, 114, 199 (хитовые серьги, близнецы на WB дешевле) → в тест;
 - свадебный комплект без запаса ≥1,15 → весенняя волна;
 - остальные «оплатить»/«тест» с запасом ≥1,0 → тест 10 шт (CAP — не больше N на группу «рынок × стиль», по запасу);
-- запас <1,0 → отложить до данных продаж; наборы — 15 самых дешёвых × 10."""
+- запас <1,0 → отложить до данных продаж; наборы — до 15 самых дешёвых с запасом ≥1,0 × 10 (30.10)."""
 import json, os
 from collections import Counter, defaultdict
 s = json.load(open("scored.json")); con = json.load(open("стили/consensus.json")); F = json.load(open("наборы_серьги/final_sets_canon.json"))   # 29.10: наборы по канону (sets_canon.py)
@@ -24,12 +24,12 @@ for v in T.values():
     for j, (hr, n) in enumerate(v):
         r = s[n - 1]; a, q = ("тест 10", min(10, r["qty"])) if not CAP or j < CAP else ("тест следующей очередью", 0)
         out[a] += 1; y[a] += r["cny"] * q; plan[n] = (a, q)
-sets = sorted([c for c in F if c["ok_canon"] and c["eye"]], key=lambda c: c["need_canon"])[:15]   # 2-е ревью Codex: только пары, проверенные глазами
-y["наборы 15×10"] = sum(10 * c["cny"] for c in sets)
+sets = sorted([c for c in F if c["ok_canon"] and c["eye"] and (c["headroom"] or 0) >= 1.0], key=lambda c: c["need_canon"])[:15]   # 30.10: запас ≥1,0, как у поштучных тестов (рынок без ценового фильтра)   # 2-е ревью Codex: только пары, проверенные глазами
+y["наборы ×10"] = sum(10 * c["cny"] for c in sets)
 for c in sets: plan[f"набор {c['neck']}+{c['ear']}"] = ("набор 10", 10)   # 29.10: наборы — в том же JSON плана
 cards = sum(q > 0 for a, q in plan.values())
 for k in out: print(f"{k}: {out[k]} поз., ¥{round(y[k])}")
-print(f"наборы 15×10: ¥{round(y['наборы 15×10'])}"); print(f"ИТОГО сразу ¥{round(sum(y.values()))}, новых карточек {cards}")
+print(f"наборы ×10 ({len(sets)}): ¥{round(y['наборы ×10'])}"); print(f"ИТОГО сразу ¥{round(sum(y.values()))}, новых карточек {cards}")
 P = {n: v for n, v in plan.items() if isinstance(n, int)}
 print("ровно 70 баллов: в «оплатить 50» первой волны", sum(1 for n, (a, q) in P.items() if a == "оплатить 50" and s[n - 1]["total"] == 70),
       "| 70–74 в первой волне", sum(1 for n, (a, q) in P.items() if a.startswith("оплатить") and s[n - 1]["total"] < 75),

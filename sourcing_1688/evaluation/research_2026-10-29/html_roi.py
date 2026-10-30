@@ -64,6 +64,8 @@ for i, r in enumerate(s):
     if key not in cache: cache[key] = SCP[key[1]] if key[0] == "S" else pool(qs)
     rows = cache[key]
     if mt in OPP: rows = [x for x in rows if MT["wb"].get(str(x["nm"])) != OPP[mt]]
+    if "mkt" in r:   # 30.10: рынок, по которому price_check_canon.py принял решение (выдача без фильтра, металл, жемчуг, близкие аналоги)
+        rows = [dict(nm=a_, price=b_, orders30=c_, rating_cnt=d_) for a_, b_, c_, d_ in r["mkt"]]; qs = r["mkt_q"]
     pack = 20 if r["seg"] in SETS else 0
     inv = 12.72 * r["cny"] + 22 + 0.285 * r["w"] + pack; need = (inv * CF["k"] - CF["b"]) / (CF["a"] - DRR); thr = need * (1 - SPP)
     assert round(need) == r["need_canon"], n
@@ -85,7 +87,7 @@ for i, r in enumerate(s):
         yuan=round(12.72 * r["cny"]), cargo=round(0.285 * r["w"]), inv=round(inv), need=round(need), thr=round(thr),
         q0=qs[0] if qs else r["seg"], hot=len(hot), ok=len(okr), fresh=fr, med=med, Pm=round(Pm) if Pm else None,
         rm=roi(Pm, inv) if Pm else None, rn=roi(need, inv), hr=r.get("headroom"), total=r["total"],
-        metal=mt, R=r["R"], stops=r["stops"], dec=r["decisionCANON"], why=r["whyCANON"], eye=r.get("eye"), hit=n in HIT,
+        metal=mt, msrc=r.get("mkt_src", "группа"), R=r["R"], stops=r["stops"], dec=r["decisionCANON"], why=r["whyCANON"], eye=r.get("eye"), hit=n in HIT,
         plan={k: PLAN[k].get(str(n)) for k in PLAN}, qty=QTY.get(str(n), 0), img=thumb(n), ph=sum(os.path.exists(p) for p in r.get("imgs") or []),
         dist=[pct(hot, q) for q in (0, .25, .5, .75)] + [hot[-1] if hot else None], an=an, cp=cp, like=like, top=top, nwb=len(AW), eyea=(lambda e: e if e and e.get("an") == [c["nm"] for c in an[:3]] else None)(EYEA.get(str(n))), psrc=r["psrc"], P0=r["P"], qs=qs))
 
@@ -100,7 +102,7 @@ for (q, stl), v in T.items():
     for j, (hr, n) in enumerate(v): RANK[n] = (j + 1, len(v), q, stl)
 for x in rows_out: x["rank"] = RANK.get(x["n"])
 
-sets = sorted([c for c in F if c["ok_canon"] and c["eye"]], key=lambda c: c["need_canon"])[:15]
+sets = sorted([c for c in F if c["ok_canon"] and c["eye"] and (c["headroom"] or 0) >= 1.0], key=lambda c: c["need_canon"])[:15]   # как в consensus_canon.py (30.10)
 setmeta = []
 W = lambda k: s[k - 1]["w"]
 for c in F:

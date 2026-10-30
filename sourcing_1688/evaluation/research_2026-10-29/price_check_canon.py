@@ -21,19 +21,35 @@ def need_canon(cny, w, pack): inv = 12.72 * cny + 22 + 0.285 * w + pack; return 
 # Серебряная позиция в стиле SCULPT проверяется по своей обычной группе запросов, а не по пулу скульптурного золота.
 METAL = os.environ.get("METAL") == "1"
 if METAL: MT = json.load(open("metal.json")); OPP = {"gold": "silver", "silver": "gold"}
+# 30.10: PEARL=1 — в группах бус и жемчуга (запрос содержит «бусы» или «жемчуг») рынок того же материала: жемчужной позиции
+# (стиль PEARL у консенсуса) не засчитываются карточки «без жемчуга», нежемчужной — «жемчуг» (metal.json → pearl, по названию, иначе CLIP).
+# У бус добавляется точный запрос: «бусы жемчуг» или «бусы из натуральных камней» (выдача 30.10).
+# CLOSE=1 — позиция, у которой поиском 30.10 найдено ≥2 близких аналога (глазами ≥1) с ≥30 заказами, проверяется по ним (analogs_close.json): цена подтверждена, если ≥3 продаются по нужной витрине и ≥1 новая.
+PEARL = os.environ.get("PEARL") == "1"; CLOSE = os.environ.get("CLOSE") == "1"
+if PEARL: PL = json.load(open("metal.json"))["pearl"]
+CL = json.load(open("analogs_close.json")) if CLOSE else {}
 cache, out = {}, Counter()
 for i, r in enumerate(s):
     st_ = con[str(i + 1)]["основной"]; qs, _ = group(r["seg"], st_)
     mt = MT["ours"][str(i + 1)] if METAL else None
     if st_ == "SCULPT" and sk(r["seg"]) and mt != "silver": key = ("S", sk(r["seg"])); qs = [f"скульптурное золото — {sk(r['seg'])} (аналоги глазами)"]
-    else: key = ("Q",) + tuple(qs)
+    else:
+        if PEARL and r["seg"] == "бусы": qs = qs + (["бусы жемчуг"] if PL["ours"][str(i + 1)] else ["бусы из натуральных камней"])
+        key = ("Q",) + tuple(qs)
     if key not in cache: cache[key] = SCP[key[1]] if key[0] == "S" else pool(qs)
     rows = cache[key]
     if METAL and mt in OPP: rows = [x for x in rows if MT["wb"].get(str(x["nm"])) != OPP[mt]]
+    if PEARL and any("бусы" in q or "жемчуг" in q for q in qs):
+        opp = "no" if PL["ours"][str(i + 1)] else "pearl"; rows = [x for x in rows if PL["wb"].get(str(x["nm"])) != opp]
+    src = "группа"
+    if str(i + 1) in CL:
+        cr = [x for x in CL[str(i + 1)] if x["orders30"] >= 30]
+        if len(cr) >= 2: rows, qs, src = CL[str(i + 1)], [f"близкие аналоги, найденные глазами ({len(cr)} с ≥30 заказами)"], "близкие"
+    r["mkt"] = [[str(x["nm"]), x["price"], x["orders30"], x.get("rating_cnt") or 0] for x in rows]; r["mkt_q"] = qs; r["mkt_src"] = src
     r["metal"] = mt; need, inv = need_canon(r["cny"], W(r), 20 if r["seg"] in SETS else 0); thr = need * (1 - SPP)
     ok_rows = [x for x in rows if x["orders30"] >= 30 and x["price"] >= thr]; fr = [x for x in ok_rows if (x.get("rating_cnt") or 0) < 100]
     hot = sorted(x["price"] for x in rows if x["orders30"] >= 30); med = hot[len(hot) // 2] if hot else None
-    ok = len(ok_rows) >= 5 and len(fr) >= 1
+    ok = len(ok_rows) >= (3 if src == "близкие" else 5) and len(fr) >= 1   # 30.10: близкие аналоги, найденные глазами, — сильнее группы, порог 3
     r["need_canon"] = round(need); r["inv"] = round(inv); r["headroom"] = round(med / thr, 2) if med else None
     q0 = qs[0] if qs else r["seg"]
     if r["stops"]: d, why = "не брать (стоп-фактор)", "; ".join(r["stops"])

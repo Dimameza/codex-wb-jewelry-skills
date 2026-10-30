@@ -135,7 +135,7 @@ function row(x){
  const p=rec(x), roiM=x.rm?x.rm[3]:null;
  return `<details class="it" data-n="${x.n}"><summary>${x.img?`<img src="data:image/jpeg;base64,${x.img}" alt="" data-lb="${x.n}" title="Открыть фото">`:'<div class="ph"></div>'}<span class="num">№${x.n}</span>
  <span class="nm">${esc(x.name)}<br><small>${esc(x.seg)} · ${esc(x.style)} · заказ «${esc(x.order)}», стр. ${x.row}</small></span>
- <span class="kpi"><span class="chip">¥${dec(x.cny)}</span><span class="chip">${x.total} балл.</span><span class="chip">ROI ${roiM==null?'—':roiM+' %'}</span><span class="chip">запас ×${dec(x.hr)}</span>
+ <span class="kpi"><span class="chip">¥${dec(x.cny)}</span><span class="chip">${x.total} балл.</span><span class="chip">ROI ${roiM==null?'—':roiM+' %'}</span><span class="chip">запас ×${dec(x.hr)}</span>${(()=>{const c=eyeCat(x);return c==null?'':`<span class="b ${c>=1?'ok':c>0?'warn':'bad'}" title="Аналоги, проверка глазами">аналоги ${c===2?'✓✓':c===1?'✓':c>0?'±':'✗'}</span>`})()}
  <span class="b ${decCls(x.dec)}">${esc(x.dec)}</span><span class="b ${planCls(p&&p[0])}">${p?esc(p[0])+(p[1]?' · '+p[1]+' шт':''):'вне плана'}</span></span></summary><div class="body"></div></details>`;
 }
 function roiTable(x){
@@ -220,6 +220,12 @@ function how(){
  <h4>6. Решение</h4><ol class="chain"><li>Стоп-фактор (копия бренда и т. п.) → не брать.</li><li>Баллы < 55 → не брать.</li><li>Цена подтверждена, если по запросу ≥5 карточек с ≥30 заказами продаются на витрине не ниже нужной и хотя бы одна из них новая (<100 отзывов).</li><li>Подтверждена и баллы ≥70 → оплатить; подтверждена и 55–69 → тест; не подтверждена и ≥70 → тест; иначе не брать.</li></ol>
  <h4>7. Варианты первой волны</h4><ul><li><b>Оплатить 50 шт</b> — «оплатить» и запас ≥ 1,15 (№108, 111, 114, 199 — в тест: близнецы на WB дешевле).</li><li><b>Рекомендованный:</b> при баллах 70–74 — 25 шт.</li><li><b>Тест 10 шт</b> — «оплатить» с запасом < 1,15 или «тест» с запасом ≥ 1,0. В строгом и рекомендованном вариантах — не больше 3 лучших по запасу в группе «запрос WB × стиль».</li><li>Запас < 1,0 → отложить до данных продаж.</li><li>Наборы — 15 самых дешёвых проверенных пар по 10 шт.</li></ul>
  <h4>8. Аналоги и копии в карточке позиции</h4><ul><li><b>3 аналога по стилю</b> — самые похожие по фото (CLIP ViT-B-32) из карточек группы, которые продаются по нужной витрине и дороже с ≥30 заказами. Если таких меньше трёх, добавлены самые похожие из более дешёвых, с пометкой «дешевле нужной».</li><li><b>Копия конкурента</b> — карточка WB с тем же фото. Совпадение проверяется по точкам изображения (ORB + RANSAC) среди 5 ближайших по CLIP. От 30 точек — то же фото, 10–29 — возможно та же модель, это стоит проверить глазами. Всего сравнено 3 007 карточек WB.</li><li>Вывод о цене делается по всей группе. Аналоги и копии его иллюстрируют, а копия, которая продаётся дешевле, — прямой риск.</li></ul>
+ <h4>9. Проверка аналогов глазами (30.10)</h4><p>Все ${fmt(I.filter(x=>x.eyea).length)} позиций с аналогами просмотрены глазами: кандидат рядом с тремя аналогами. Каждый аналог получил оценку: 2 — та же или почти та же вещь, 1 — тот же тип изделия и стиль, 0 — другой тип изделия или явно другой стиль (в том числе серебро против золота).</p>
+ ${(()=>{const g=f=>[[2,'есть та же вещь'],[1,'≥2 близких'],[0.5,'1 близкий'],[0,'ни одного близкого']].map(([c,t])=>`<td class="r">${I.filter(x=>f(x)&&eyeCat(x)===c).length}</td>`).join('');
+  const W=x=>rec(x)&&rec(x)[1]>0;
+  return `<div class="wrap"><table><tr><th></th><th class="r">Та же вещь</th><th class="r">≥2 близких</th><th class="r">1 близкий</th><th class="r">Ни одного</th></tr>
+  <tr><td>Все</td>${g(x=>x.eyea)}</tr><tr><td>Оплатить</td>${g(x=>x.eyea&&x.dec==='оплатить')}</tr><tr><td>Тест</td>${g(x=>x.eyea&&x.dec.startsWith('тест'))}</tr><tr><td>Первая волна (рекомендованный)</td>${g(x=>x.eyea&&W(x))}</tr></table></div>
+  <p><b>Первая волна, ни одного близкого аналога</b> — цену подтверждает группа, на которую товар не похож: ${I.filter(x=>W(x)&&eyeCat(x)===0).map(x=>'№'+x.n).join(', ')}.</p>`})()}
  <h4>Сводка</h4><table><tr><th>Решение по канону</th><th class="r">Позиций</th></tr>
  <tr><td>Оплатить</td><td class="r">${cnt(x=>x.dec==='оплатить')}</td></tr><tr><td>Тест</td><td class="r">${cnt(x=>x.dec.startsWith('тест'))}</td></tr>
  <tr><td>Не брать: баллы < 55</td><td class="r">${cnt(x=>x.dec.includes('< 55'))}</td></tr><tr><td>Не брать: цена не подтверждена</td><td class="r">${cnt(x=>x.dec.includes('цена'))}</td></tr>
@@ -228,12 +234,17 @@ function how(){
  </div>`;
 }
 function phs(x){let h='';for(let k=1;k<=Math.max(x.ph,1);k++)h+=`<img src="${bigSrc(x.n,k)}" data-lb="${x.n}" data-k="${k}" alt="" onerror="this.onerror=null;this.src='data:image/jpeg;base64,${x.img}'">`;return h}
-function wbCard(c,thr,tag){const w=D.wb[c.nm]; if(!w)return '';
+const EYE=['далеко','близко','та же вещь'], EYC=['bad','warn','ok'];
+function wbCard(c,thr,tag,ev){const w=D.wb[c.nm]; if(!w)return '';
  const okp=w.price>=thr, src=`логика_ROI_фото/wb/${c.nm}.jpg`;
  return `<div class="wc"><img src="${src}" data-wb="${c.nm}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${esc(w.img)}'"><div class="t">
  <b>${fmt(w.price)} ₽</b> <span class="b ${okp?'ok':'bad'}">${okp?'≥ нужной витрины':'дешевле нужной'}</span>
  <div class="nmw">${esc(w.name)}</div><div class="m">${pl(w.orders30,'заказ','заказа','заказов')} за 30 дн · ${pl(w.rating_cnt||0,'отзыв','отзыва','отзывов')}${(w.rating_cnt||0)<100?' (новая)':''}</div>
- <div class="m">сходство фото ${Math.round(c.sim*100)} %${tag?' · '+tag:''} · <a href="${esc(w.url)}" target="_blank" rel="noopener">WB ${c.nm}</a></div></div></div>`}
+ ${ev!=null?`<div style="margin:4px 0"><span class="b ${EYC[ev]}">глазами: ${EYE[ev]}</span></div>`:''}<div class="m">сходство фото ${Math.round(c.sim*100)} %${tag?' · '+tag:''} · <a href="${esc(w.url)}" target="_blank" rel="noopener">WB ${c.nm}</a></div></div></div>`}
+function eyeCat(x){if(!x.eyea)return null;const v=x.eyea.r.filter(r=>r!=null);return v.includes(2)?2:v.filter(r=>r>=1).length>=2?1:v.some(r=>r>=1)?0.5:0}
+function eyeLine(x){const c=eyeCat(x);if(c==null)return '';const v=x.eyea.r.filter(r=>r!=null),k=v.filter(r=>r>=1).length;
+ const t=c===2?'среди аналогов есть та же или почти та же вещь — вывод о цене подкреплён хорошо':c===1?`близки ${k} из ${v.length} — вывод о цене подкреплён`:c===0.5?`близок только 1 из ${v.length} — аналоги подкрепляют цену слабо`:'ни один аналог не похож на кандидата — цена подтверждена группой, на которую товар не похож; вывод ненадёжен';
+ return `<div class="note"><b>Проверка глазами:</b> ${t}.${x.eyea.note?' '+esc(x.eyea.note)+'.':''}</div>`}
 function priceWhy(x){
  const d=x.dist, sculpt=x.q0.startsWith('скульптурное'), mk=x.ok>=5&&x.fresh>=1, share=x.hot?Math.round(100*x.ok/x.hot):0;
  let h=`<p>Для ROI 100 % при вложениях ${fmt(x.inv)} ₽ продавать нужно не дешевле <b>${fmt(x.need)} ₽</b> до СПП. При СПП 35 % покупатель видит <b>${fmt(x.thr)} ₽</b> на витрине. Это нижняя граница цены, а не цена, которую мы поставим.</p>`;
@@ -255,7 +266,7 @@ function priceWhy(x){
  if(!cp.length&&x.top) h+=`<p class="m">Копий не найдено: среди ${fmt(x.nwb)} карточек WB, по которым проверялась цена, нет того же фото. Самое похожее совпадает по CLIP на ${Math.round(x.top.sim*100)} %.</p>`;
  const an=(x.an||[]).filter(c=>D.wb[c.nm]&&!same.some(s=>s.nm===c.nm));
  if(an.length){h+=`<p><b>3 аналога по стилю, на которых основан вывод.</b> `+(an.every(c=>c.ok)?`Это самые похожие по фото из ${x.ok} карточек, которые продаются по нужной витрине и дороже.`:an.some(c=>c.ok)?`Похожих среди продающихся по нужной витрине меньше трёх, добавлены самые похожие из более дешёвых.`:`Ни одна карточка не продаётся по нужной витрине, показаны самые похожие из более дешёвых.`)+
-  ` Сам вывод сделан по всей группе: медиана и число карточек выше.</p><div class="cards">${an.map(c=>wbCard(c,x.thr)).join('')}</div>`;}
+  ` Сам вывод сделан по всей группе: медиана и число карточек выше.</p><div class="cards">${an.map((c,i)=>wbCard(c,x.thr,'',x.eyea?x.eyea.r[(x.an||[]).findIndex(a=>a.nm===c.nm)]:null)).join('')}</div>`+eyeLine(x);}
  if(x.like&&D.wb[x.like.nm]&&!an.some(c=>c.nm===x.like.nm)&&!cp.some(c=>c.nm===x.like.nm))
   h+=`<p><b>Хит WB из среза 22.10</b>, на котором основан балл «спрос».</p><div class="cards">${wbCard(x.like,x.thr,'хит')}</div>`;
  return h;

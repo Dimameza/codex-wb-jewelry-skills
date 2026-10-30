@@ -47,6 +47,7 @@ AW = json.load(open("analogs_wb.json")); EM = np.load("analogs_emb.npz"); WBI = 
 SIM = np.maximum(EM["ours"] @ EM["wb"].T, EM["ours34"] @ EM["wb"].T)   # косинус CLIP, 1485 × карточки WB (фото целиком и обрезанное до 3:4)
 ORB = json.load(open("analogs_orb.json"))   # копии: совпадение точек фото ORB + RANSAC (analogs_orb.py); ≥30 — то же фото, 10–29 — похожая модель
 COPY, NEAR = 30, 10
+EYEA = json.load(open("eye_analogs/eye_analogs.json")) if os.path.exists("eye_analogs/eye_analogs.json") else {}   # 30.10: аналоги проверены глазами (0 далеко, 1 близко, 2 та же вещь)
 USED = set()
 def card(nm, i):
     k = WBI.get(str(nm))
@@ -82,7 +83,7 @@ for i, r in enumerate(s):
         rm=roi(Pm, inv) if Pm else None, rn=roi(need, inv), hr=r.get("headroom"), total=r["total"],
         R=r["R"], stops=r["stops"], dec=r["decisionCANON"], why=r["whyCANON"], eye=r.get("eye"), hit=n in HIT,
         plan={k: PLAN[k].get(str(n)) for k in PLAN}, qty=QTY.get(str(n), 0), img=thumb(n), ph=sum(os.path.exists(p) for p in r.get("imgs") or []),
-        dist=[pct(hot, q) for q in (0, .25, .5, .75)] + [hot[-1] if hot else None], an=an, cp=cp, like=like, top=top, nwb=len(AW), psrc=r["psrc"], P0=r["P"], qs=qs))
+        dist=[pct(hot, q) for q in (0, .25, .5, .75)] + [hot[-1] if hot else None], an=an, cp=cp, like=like, top=top, nwb=len(AW), eyea=EYEA.get(str(n)), psrc=r["psrc"], P0=r["P"], qs=qs))
 
 # место в группе «рынок × стиль» для тестов (как в consensus_canon.py)
 T = defaultdict(list)

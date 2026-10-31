@@ -53,6 +53,7 @@ summary img{cursor:zoom-in}
 .wc .t{padding:7px 9px}.wc .t b{font-size:14px}.wc .nmw{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:3px 0}
 .dist{display:flex;gap:0;margin:8px 0 2px;font-size:12px}.dist div{flex:1;border-left:1px solid var(--line);padding:2px 6px}.dist div:first-child{border:0}
 .dist b{display:block;font-size:14px;font-variant-numeric:tabular-nums}
+.setph{white-space:nowrap}.setph img{width:84px;height:84px;object-fit:cover;border-radius:7px;margin-right:4px;cursor:zoom-in;background:var(--chip);vertical-align:top}
 .note{background:var(--chip);border-radius:8px;padding:8px 11px;margin:8px 0}
 .phs{display:flex;gap:8px;flex-wrap:wrap}.phs img{width:120px;height:120px;object-fit:cover;border-radius:8px;cursor:zoom-in;background:var(--chip);border:1px solid var(--line)}
 #lb{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;z-index:50;touch-action:none;user-select:none}
@@ -199,11 +200,12 @@ function body(x){
  ${crit.map(([k,[v,w]])=>`<tr><td>${k}</td><td class="r">${v} / ${max[k]||''}</td><td>${esc(w)}</td></tr>`).join('')}</table></div>
  <p class="m">1688: <a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.url)}</a> · ${esc(x.cn)}</p>`;
 }
+function setPh(n){const x=byN[n];if(!x)return '';return `<img src="${bigSrc(n,1)}" data-lb="${n}" alt="№${n}" title="№${n} · ${esc(x.name)}" loading="lazy" onerror="this.onerror=null;this.src='data:image/jpeg;base64,${x.img}'">`}
 function setsTab(){
  const S=[...D.sets].sort((a,b)=>(b.inplan-a.inplan)||a.need-b.need);
  return `<p class="prose">56 пар «колье + серьги». В план идут до 15 самых дешёвых по нужной цене из тех, что проходят по канону, проверены глазами и имеют запас ≥ 1,0, по 10 шт. Упаковка набора 20 ₽ входит во вложения. Рынок — продающиеся комплекты WB (≥30 заказов за 30 дней).</p>
- <div class="wrap"><table><tr><th>Пара</th><th class="r">¥</th><th class="r">Вложения</th><th class="r">Нужная цена</th><th class="r">Нужная витрина</th><th class="r">Продаются выше</th><th class="r">ROI на рынке</th><th class="r">Запас</th><th>Глазами</th><th>Решение</th></tr>
- ${S.map(c=>`<tr><td>№${c.neck} + №${c.ear}</td><td class="r">${dec(c.cny)}</td><td class="r">${fmt(c.inv)}</td><td class="r">${fmt(c.need)}</td><td class="r">${fmt(c.thr)}</td><td class="r">${c.market} (новых ${c.fresh})</td><td class="r">${c.rm?c.rm[3]+' %':'—'}</td><td class="r">×${dec(c.hr)}</td><td>${c.eye?'да':'<span class="n">нет</span>'}</td>
+ <div class="wrap"><table><tr><th>Фото: колье + серьги</th><th>Пара</th><th class="r">¥</th><th class="r">Вложения</th><th class="r">Нужная цена</th><th class="r">Нужная витрина</th><th class="r">Продаются выше</th><th class="r">ROI на рынке</th><th class="r">Запас</th><th>Глазами</th><th>Решение</th></tr>
+ ${S.map(c=>`<tr><td class="setph">${setPh(c.neck)}${setPh(c.ear)}</td><td>№${c.neck} + №${c.ear}<br><span class="m">${esc((byN[c.neck]||{}).style||'')}</span></td><td class="r">${dec(c.cny)}</td><td class="r">${fmt(c.inv)}</td><td class="r">${fmt(c.need)}</td><td class="r">${fmt(c.thr)}</td><td class="r">${c.market} (новых ${c.fresh})</td><td class="r">${c.rm?c.rm[3]+' %':'—'}</td><td class="r">×${dec(c.hr)}</td><td>${c.eye?'да':'<span class="n">нет</span>'}</td>
  <td>${c.inplan?'<span class="b ok">в плане · 10 шт</span>':!c.ok?'<span class="b bad">цена не подтверждена</span>':!c.eye?'<span class="b mid">не проверен глазами</span>':c.hr<1?'<span class="b bad">запас < 1,0</span>':'<span class="b mid">не вошёл в 15 дешёвых</span>'}</td></tr>`).join('')}</table></div>
  <p class="m">ROI на рынке у наборов считается по медиане витрины всех продающихся комплектов (медиана/0,65 = цена продавца), так что он одинаков по рынку и различается только вложениями.</p>`;
 }

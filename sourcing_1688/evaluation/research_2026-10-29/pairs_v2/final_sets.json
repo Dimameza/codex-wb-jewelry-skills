@@ -1,0 +1,386 @@
+[
+ {
+  "neck": 53,
+  "ear": 118,
+  "cny": 13.4,
+  "match": 2,
+  "eye": true,
+  "common": "мотив «лист»"
+ },
+ {
+  "neck": 64,
+  "ear": 376,
+  "cny": 17.0,
+  "match": 2,
+  "eye": true,
+  "common": "гладкая вытянутая открытая капля"
+ },
+ {
+  "neck": 200,
+  "ear": 166,
+  "cny": 13.5,
+  "match": 2,
+  "eye": true,
+  "common": "скруглённый квадрат-рамка и тёмно-коричневая вставка"
+ },
+ {
+  "neck": 230,
+  "ear": 70,
+  "cny": 17.4,
+  "match": 2,
+  "eye": true,
+  "common": "неровный гладкий обруч"
+ },
+ {
+  "neck": 459,
+  "ear": 431,
+  "cny": 13.96,
+  "match": 2,
+  "eye": true,
+  "common": "чёрный камень в серебре"
+ },
+ {
+  "neck": 480,
+  "ear": 374,
+  "cny": 13.3,
+  "match": 2,
+  "eye": true,
+  "common": "мятый металл"
+ },
+ {
+  "neck": 503,
+  "ear": 677,
+  "cny": 16.7,
+  "match": 2,
+  "eye": true,
+  "common": "гладкий зеркальный обруч"
+ },
+ {
+  "neck": 512,
+  "ear": 677,
+  "cny": 16.9,
+  "match": 2,
+  "eye": true,
+  "common": "гладкий зеркальный обруч"
+ },
+ {
+  "neck": 516,
+  "ear": 73,
+  "cny": 14.29,
+  "match": 2,
+  "eye": true,
+  "common": "мотив «солнце», лучи"
+ },
+ {
+  "neck": 518,
+  "ear": 62,
+  "cny": 14.32,
+  "match": 2,
+  "eye": true,
+  "common": "гладкая «жидкая» волна"
+ },
+ {
+  "neck": 519,
+  "ear": 335,
+  "cny": 11.63,
+  "match": 2,
+  "eye": true,
+  "common": "витой (скрученный) металл"
+ },
+ {
+  "neck": 520,
+  "ear": 168,
+  "cny": 15.4,
+  "match": 2,
+  "eye": true,
+  "common": "гладкая «жидкая» волна"
+ },
+ {
+  "neck": 553,
+  "ear": 402,
+  "cny": 18.8,
+  "match": 2,
+  "eye": true,
+  "common": "широкая гладкая зеркальная полоса с прямыми краями"
+ },
+ {
+  "neck": 556,
+  "ear": 130,
+  "cny": 17.22,
+  "match": 2,
+  "eye": true,
+  "common": "мятый (молотковый) металл"
+ },
+ {
+  "neck": 559,
+  "ear": 912,
+  "cny": 21.36,
+  "match": 2,
+  "eye": true,
+  "common": "белая жемчужина-подвеска"
+ },
+ {
+  "neck": 563,
+  "ear": 62,
+  "cny": 16.12,
+  "match": 2,
+  "eye": true,
+  "common": "гладкая волна"
+ },
+ {
+  "neck": 564,
+  "ear": 906,
+  "cny": 20.89,
+  "match": 2,
+  "eye": true,
+  "common": "витки проволоки (рифлёная многорядная фактура)"
+ },
+ {
+  "neck": 568,
+  "ear": 836,
+  "cny": 19.26,
+  "match": 2,
+  "eye": true,
+  "common": "мотив «шар»"
+ },
+ {
+  "neck": 580,
+  "ear": 163,
+  "cny": 17.3,
+  "match": 2,
+  "eye": true,
+  "common": "объёмная гладкая капля-полумесяц"
+ },
+ {
+  "neck": 582,
+  "ear": 721,
+  "cny": 21,
+  "match": 2,
+  "eye": true,
+  "common": "объёмный гладкий полумесяц"
+ },
+ {
+  "neck": 587,
+  "ear": 677,
+  "cny": 19.4,
+  "match": 2,
+  "eye": true,
+  "common": "гладкий зеркальный обруч"
+ },
+ {
+  "neck": 591,
+  "ear": 163,
+  "cny": 18.38,
+  "match": 2,
+  "eye": true,
+  "common": "объёмная гладкая капля-полумесяц"
+ },
+ {
+  "neck": 593,
+  "ear": 75,
+  "cny": 19.44,
+  "match": 2,
+  "eye": true,
+  "common": "гладкий выпуклый полумесяц"
+ },
+ {
+  "neck": 800,
+  "ear": 66,
+  "cny": 18.82,
+  "match": 2,
+  "eye": true,
+  "common": "мотив «сердце»"
+ },
+ {
+  "neck": 901,
+  "ear": 912,
+  "cny": 19.1,
+  "match": 2,
+  "eye": true,
+  "common": "белый жемчуг"
+ },
+ {
+  "neck": 961,
+  "ear": 97,
+  "cny": 16.7,
+  "match": 2,
+  "eye": true,
+  "common": "мелкий мятый металл, объём бусины"
+ },
+ {
+  "neck": 1055,
+  "ear": 125,
+  "cny": 17.0,
+  "match": 2,
+  "eye": true,
+  "common": "мотив «цветок», оранжевая эмаль"
+ },
+ {
+  "neck": 1065,
+  "ear": 212,
+  "cny": 19.77,
+  "match": 2,
+  "eye": true,
+  "common": "овальный диск с фактурой"
+ },
+ {
+  "neck": 1103,
+  "ear": 168,
+  "cny": 21.0,
+  "match": 2,
+  "eye": true,
+  "common": "гладкая органичная петля волной, есть серебро"
+ },
+ {
+  "neck": 1137,
+  "ear": 721,
+  "cny": 23.85,
+  "match": 2,
+  "eye": true,
+  "common": "объёмный гладкий полумесяц"
+ },
+ {
+  "neck": 1143,
+  "ear": 738,
+  "cny": 27.8,
+  "match": 2,
+  "eye": true,
+  "common": "скрученная лента с мелкой рифлёной фактурой"
+ },
+ {
+  "neck": 1171,
+  "ear": 108,
+  "cny": 17.7,
+  "match": 2,
+  "eye": true,
+  "common": "мотив «цветок», золото"
+ },
+ {
+  "neck": 1175,
+  "ear": 649,
+  "cny": 24.98,
+  "match": 2,
+  "eye": true,
+  "common": "мотив «цветок», серебро"
+ },
+ {
+  "neck": 1176,
+  "ear": 374,
+  "cny": 19.48,
+  "match": 2,
+  "eye": true,
+  "common": "мятый металл"
+ },
+ {
+  "neck": 1177,
+  "ear": 836,
+  "cny": 23.44,
+  "match": 2,
+  "eye": true,
+  "common": "мотив «шар»"
+ },
+ {
+  "neck": 1178,
+  "ear": 180,
+  "cny": 23.8,
+  "match": 2,
+  "eye": true,
+  "common": "серебро, объёмная гладкая капля"
+ },
+ {
+  "neck": 1185,
+  "ear": 376,
+  "cny": 22.78,
+  "match": 2,
+  "eye": true,
+  "common": "гладкая вытянутая капля"
+ },
+ {
+  "neck": 84,
+  "ear": null,
+  "native": true,
+  "ear_cny": 5.9,
+  "ear_w": 10,
+  "cny": 14.8,
+  "match": 2,
+  "eye": true,
+  "common": "родные серьги той же модели"
+ },
+ {
+  "neck": 481,
+  "ear": null,
+  "native": true,
+  "ear_cny": 3.8,
+  "ear_w": 10,
+  "cny": 10.6,
+  "match": 2,
+  "eye": true,
+  "common": "родные серьги той же модели"
+ },
+ {
+  "neck": 500,
+  "ear": null,
+  "native": true,
+  "ear_cny": 3.8,
+  "ear_w": 10,
+  "cny": 11.6,
+  "match": 2,
+  "eye": true,
+  "common": "родные серьги той же модели"
+ },
+ {
+  "neck": 509,
+  "ear": null,
+  "native": true,
+  "ear_cny": 1.6,
+  "ear_w": 10,
+  "cny": 7.6,
+  "match": 2,
+  "eye": true,
+  "common": "родные серьги той же модели"
+ },
+ {
+  "neck": 540,
+  "ear": null,
+  "native": true,
+  "ear_cny": 4.8,
+  "ear_w": 10,
+  "cny": 11.6,
+  "match": 2,
+  "eye": true,
+  "common": "родные серьги той же модели"
+ },
+ {
+  "neck": 545,
+  "ear": null,
+  "native": true,
+  "ear_cny": 3.8,
+  "ear_w": 10,
+  "cny": 10.6,
+  "match": 2,
+  "eye": true,
+  "common": "родные серьги той же модели"
+ },
+ {
+  "neck": 577,
+  "ear": null,
+  "native": true,
+  "ear_cny": 3.8,
+  "ear_w": 10,
+  "cny": 12.6,
+  "match": 2,
+  "eye": true,
+  "common": "родные серьги той же модели"
+ },
+ {
+  "neck": 585,
+  "ear": null,
+  "native": true,
+  "ear_cny": 3.8,
+  "ear_w": 10,
+  "cny": 12.6,
+  "match": 2,
+  "eye": true,
+  "common": "родные серьги той же модели"
+ }
+]

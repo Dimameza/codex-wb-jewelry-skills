@@ -110,7 +110,7 @@ for c in F:
     med = c["headroom"] * c["thr_canon"] if c["headroom"] else None; Pm = med / (1 - SPP) if med else None
     setmeta.append(dict(neck=c["neck"], ear=c["ear"], cny=c["cny"], inv=round(inv), need=c["need_canon"], thr=c["thr_canon"], market=c["market_canon"],
                         fresh=c["fresh_canon"], ok=c["ok_canon"], eye=c["eye"], hr=c["headroom"], med=round(med) if med else None, Pm=round(Pm) if Pm else None,
-                        rm=roi(Pm, inv) if Pm else None, inplan=c in sets, sim=c.get("sim"), match=c.get("match"), native=c.get("native"), ear_cny=c.get("ear_cny")))
+                        rm=roi(Pm, inv) if Pm else None, inplan=c in sets, sim=c.get("sim"), match=c.get("match"), native=c.get("native"), ear_cny=c.get("ear_cny"), common=c.get("common", "")))
 
 WBD = {x["nm"]: {k: x[k] for k in ("name", "price", "orders30", "rating_cnt", "url", "img")} for x in AW if x["nm"] in USED}
 DATA = dict(items=rows_out, sets=setmeta, cf=CF, spp=SPP, drr=DRR, wb=WBD)

@@ -22,5 +22,5 @@ for c in F:
     ok = [x for x in sets if x["price"] >= thr]; fr = sum((x.get("rating_cnt") or 0) < 100 for x in ok)
     c.update(metal=mt, need_canon=round(need), thr_canon=round(thr), market_canon=len(ok), fresh_canon=fr, ok_canon=len(ok) >= 5 and fr >= 1, headroom=round(med / thr, 2))
 json.dump(F, open(f"{W0}/final_sets_canon.json", "w"), ensure_ascii=False, indent=1)
-print("наборов", len(F), "проходят по канону", sum(c["ok_canon"] for c in F), "медиана рынка", med, "нужная цена: было/стало (медиана)",
-      sorted(c["need"] for c in F)[len(F) // 2], sorted(c["need_canon"] for c in F)[len(F) // 2])
+print("наборов", len(F), "проходят по канону", sum(c["ok_canon"] for c in F), "медиана рынка", med, "нужная цена (медиана)",
+      sorted(c["need_canon"] for c in F)[len(F) // 2], "| совпадают глазами", sum(c.get("match") == 2 for c in F))   # 31.10: пары подобраны заново глазами (rematch_2026-10-31.json)

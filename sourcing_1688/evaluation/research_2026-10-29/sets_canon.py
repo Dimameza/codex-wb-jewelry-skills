@@ -14,7 +14,8 @@ ALL = sets
 METAL = os.environ.get("METAL") == "1"; MT = json.load(open(f"{E}/metal.json")) if METAL else None; OPP = {"gold": "silver", "silver": "gold"}
 W = lambda r: r["w"] if isinstance(r["w"], (int, float)) else 30
 for c in F:
-    a, b = s[c["neck"] - 1], s[c["ear"] - 1]; mt = MT["ours"][str(c["neck"])] if METAL else None
+    a = s[c["neck"] - 1]; b = s[c["ear"] - 1] if c.get("ear") else {"w": c.get("ear_w", 10)}   # 31.10: ear = null — родные серьги того же товара 1688
+    mt = MT["ours"][str(c["neck"])] if METAL else None
     sets = [x for x in ALL if MT["wb"].get(str(x["nm"])) != OPP[mt]] if mt in OPP else ALL
     hot = sorted(x["price"] for x in sets); med = hot[len(hot) // 2]
     inv = 12.72 * c["cny"] + 22 + 0.285 * (W(a) + W(b)) + 20

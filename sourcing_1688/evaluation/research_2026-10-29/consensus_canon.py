@@ -26,7 +26,7 @@ for v in T.values():
         out[a] += 1; y[a] += r["cny"] * q; plan[n] = (a, q)
 sets = sorted([c for c in F if c["ok_canon"] and c["eye"] and (c["headroom"] or 0) >= 1.0], key=lambda c: c["need_canon"])[:15]   # 30.10: запас ≥1,0, как у поштучных тестов (рынок без ценового фильтра)   # 2-е ревью Codex: только пары, проверенные глазами
 y["наборы ×10"] = sum(10 * c["cny"] for c in sets)
-for c in sets: plan[f"набор {c['neck']}+{c['ear']}"] = ("набор 10", 10)   # 29.10: наборы — в том же JSON плана
+for c in sets: plan[f"набор {c['neck']}+{c['ear'] or 'родные серьги'}"] = ("набор 10", 10)   # 29.10: наборы — в том же JSON плана
 cards = sum(q > 0 for a, q in plan.values())
 for k in out: print(f"{k}: {out[k]} поз., ¥{round(y[k])}")
 print(f"наборы ×10 ({len(sets)}): ¥{round(y['наборы ×10'])}"); print(f"ИТОГО сразу ¥{round(sum(y.values()))}, новых карточек {cards}")
@@ -36,7 +36,9 @@ print("ровно 70 баллов: в «оплатить 50» первой во�
       "| ровно 70 среди всех «оплатить»", sum(1 for r in s if r["decisionCANON"] == "оплатить" and r["total"] == 70))
 # 29.10: сведение количеств — компоненты наборов прибавляются к поштучному заказу позиции (¥ наборов уже учтён строкой «наборы»)
 comp = Counter()
-for c in sets: comp[c["neck"]] += 10; comp[c["ear"]] += 10
+for c in sets:
+    comp[c["neck"]] += 10
+    if c.get("ear"): comp[c["ear"]] += 10   # 31.10: родные серьги покупаются вариантом того же товара — отдельной позиции нет
 total_q = {n: (plan[n][1] if n in plan else 0) + comp[n] for n in set(comp) | {n for n in plan if isinstance(n, int)}}
 print("компоненты наборов:", len(comp), "поз.;", "только в наборах (сами не закупаются):", sum(1 for n in comp if n not in plan or plan[n][1] == 0),
       "| больше всего:", ", ".join(f"№{n}: {plan[n][1] if n in plan else 0} + {comp[n]} в наборы" for n, _ in comp.most_common(4)))
